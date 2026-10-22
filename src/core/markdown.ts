@@ -24,7 +24,7 @@ import { stripHtml } from '../shared/html.ts'
 import type { SiteConfig } from './config.ts'
 import type { TocEntry } from './types.ts'
 
-const PIPELINE_VERSION = '1'
+const PIPELINE_VERSION = '2'
 
 export interface MarkdownResult {
   html: string
@@ -59,6 +59,22 @@ function collectToc() {
 
 type MarkdownProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, string>
 
+function rehypeBaseLinks(options: { base: string }) {
+  const prefix = options.base === '/' ? '' : options.base.replace(/\/$/, '')
+  return (tree: HastRoot): void => {
+    if (!prefix) return
+    visit(tree, 'element', (node: Element) => {
+      for (const property of ['href', 'src'] as const) {
+        const value = node.properties?.[property]
+        if (typeof value !== 'string') continue
+        if (!value.startsWith('/') || value.startsWith('//')) continue
+        if (value === prefix || value.startsWith(`${prefix}/`)) continue
+        node.properties[property] = `${prefix}${value}`
+      }
+    })
+  }
+}
+
 function buildProcessor(config: SiteConfig): MarkdownProcessor {
   const allowHtml = config.markdown.allowHtml
   const math = config.features.math
@@ -72,6 +88,9 @@ function buildProcessor(config: SiteConfig): MarkdownProcessor {
   if (allowHtml) {
     processor = processor.use(rehypeRaw).use(rehypeSanitize) as unknown as MarkdownProcessor
   }
+  processor = processor.use(rehypeBaseLinks as never, {
+    base: config.site.base,
+  }) as unknown as MarkdownProcessor
   processor = processor.use(rehypeSlug).use(rehypeAutolinkHeadings, {
     behavior: 'wrap',
     properties: { className: ['heading-anchor'] },

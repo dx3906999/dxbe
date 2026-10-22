@@ -26,7 +26,7 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install github:dx3906999/dxbe#v0.4.0
+npm install github:dx3906999/dxbe#v0.4.1
 npx dxbe setup
 npx dxbe dev
 ```
