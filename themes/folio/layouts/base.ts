@@ -1,4 +1,10 @@
-import { html, raw, type SafeHtml, type ThemeContext } from '../../../src/theme/api.ts'
+import {
+  html,
+  languageBootstrap,
+  raw,
+  type SafeHtml,
+  type ThemeContext,
+} from '../../../src/theme/api.ts'
 import { getFolioConfig } from '../config.ts'
 
 function homeUrl(ctx: ThemeContext): string {
@@ -86,6 +92,7 @@ export function baseLayout(ctx: ThemeContext, content: SafeHtml): SafeHtml {
     ${ctx.assets.katexCss ? html`<link rel="stylesheet" href="${ctx.assets.katexCss}">` : ''}
     <script type="application/ld+json">${raw(ctx.seo.jsonLd)}</script>
     ${themeInitScript()}
+    ${languageBootstrap(ctx)}
   </head>
   <body class="page-${ctx.page.kind} width-${config.width}">
     <a class="skip-link" href="#main">${t('a11y.skip')}</a>
@@ -112,7 +119,7 @@ export function baseLayout(ctx: ThemeContext, content: SafeHtml): SafeHtml {
               ? html`<nav class="language-switch" aria-label="${t('language.switch')}">
                 ${languageLinks.map(
                   (alternate) =>
-                    html`<a href="${ctx.helpers.url(alternate.url)}" lang="${alternate.lang}" hreflang="${alternate.lang}">${alternate.label}</a>`,
+                    html`<a href="${ctx.helpers.url(alternate.url)}" data-language="${alternate.lang}" lang="${alternate.lang}" hreflang="${alternate.lang}">${alternate.label}</a>`,
                 )}
               </nav>`
               : ''

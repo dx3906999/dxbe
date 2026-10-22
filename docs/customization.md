@@ -8,7 +8,7 @@
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.4.2/dxbe-0.4.2.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.5.0/dxbe-0.5.0.tgz
 npx dxbe setup
 npx dxbe dev
 ```
@@ -82,7 +82,10 @@ npx dxbe setup --yes --force \
 | `pagination.perPage` | 每页文章数 |
 | `features.search` | 是否生成搜索页和索引 |
 | `features.math` | 是否启用 KaTeX |
+| `features.autoLanguage` | 首页按浏览器语言跳转，默认开启；手动语言选择会记住 |
 | `markdown.allowHtml` | 是否允许原始 HTML（默认 false，开启时 sanitize） |
+
+`features.autoLanguage` 只在默认语言首页读取 `navigator.languages`，并跳转到存在译文的语言首页。文章、页面和其他语言首页不会自动重定向；语言切换链接会写入 localStorage，后续访问首页优先按手动选择。
 
 主题配置由主题的 zod schema 校验。比如：
 

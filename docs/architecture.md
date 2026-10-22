@@ -39,6 +39,10 @@ site.config.ts
 - 标签 URL 对中文做百分号编码，输出目录保留 Unicode；链接检查覆盖两者。
 - 文章和页面的同目录资源复制到对应输出目录。
 
+## 语言选择
+
+`features.autoLanguage` 开启时，默认语言首页会嵌入主题 API 提供的 `languageBootstrap(ctx)` 脚本：读取 `navigator.languages`，只在默认语言首页跳转到有对应译文的语言首页；使用 `location.replace`，避免历史记录回退陷阱。文章、页面和其他语言首页不重定向。语言切换链接带 `data-language`，点击后把选择写入按站点 base 区分的 localStorage key；已有选择优先于浏览器语言。
+
 ## 主题契约
 
 - `theme.json` 声明 `apiVersion`、入口、资源和 i18n 目录。

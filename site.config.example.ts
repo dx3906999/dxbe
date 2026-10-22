@@ -67,5 +67,6 @@ export default defineConfig({
   features: {
     search: true,
     math: true,
+    autoLanguage: true,
   },
 })

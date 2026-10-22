@@ -31,6 +31,8 @@ describe('site build', () => {
     expect(zh).toContain('lang="zh"')
     expect(en).toContain('lang="en"')
     expect(zh).not.toContain('href="/zh/"')
+    expect(zh).toContain('data-language="en"')
+    expect(zh).toContain('navigator.languages')
   })
 
   it('renders a post with math, search metadata, and anchors', async () => {
@@ -40,6 +42,7 @@ describe('site build', () => {
     expect(html).toContain('data-pagefind-body')
     expect(html).toContain('data-pagefind-filter="lang:')
     expect(html).toContain('class="katex"')
+    expect(html).not.toContain('katex-error')
     expect(html).toContain('class="toc"')
   })
 

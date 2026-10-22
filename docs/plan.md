@@ -8,7 +8,7 @@
 
 ## 0. 摘要
 
-用 Node.js 24+ / TypeScript 实现静态站点生成器（SSG）。中文为默认语言，发布在站点根路径；英文发布在 `/en/`，不生成 `/zh/`，不做浏览器语言自动跳转。内容为 Markdown + YAML frontmatter，构建时完成渲染、Shiki 代码高亮、KaTeX 公式和 Pagefind 全文索引。主题是可替换的 TS 模块，带独立配置、静态资源、多语言文案和一致性测试。
+用 Node.js 24+ / TypeScript 实现静态站点生成器（SSG）。中文为默认语言，发布在站点根路径；英文发布在 `/en/`，不生成 `/zh/`。默认语言首页可选按浏览器语言跳转，深链接不重定向。内容为 Markdown + YAML frontmatter，构建时完成渲染、Shiki 代码高亮、KaTeX 公式和 Pagefind 全文索引。主题是可替换的 TS 模块，带独立配置、静态资源、多语言文案和一致性测试。
 
 站点身份全部配置化：作者、域名、仓库、语言、导航、许可证、主题都集中在 `site.config.ts`，不写死在代码或模板里。引擎作为 npm 包发布，博客仓库安装 `dxbe` 后运行 `dxbe setup` 填入自己的信息即可。内置三套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术），不是换色皮肤。
 
@@ -22,18 +22,18 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 - 配置 schema、`site.config.ts` / `site.config.example.ts`、`dxbe setup`
 - 内容扫描、frontmatter 校验、Markdown/Shiki/KaTeX 管线、Markdown 缓存
 - 路由、分页、标签、归档、Atom、sitemap、robots、404、manifest
-- 中文根路径 / 英文 `/en/`、译文关联、hreflang、语言切换器
+- 中文根路径 / 英文 `/en/`、译文关联、hreflang、语言切换器、可选首页自动语言跳转
 - 三套主题：`folio`、`orbital`、`scholar`，均通过一致性测试
 - 开发服务器、预览服务器、`npm run new`
 - Pagefind 索引、按语言过滤、核心搜索脚本
 - 内部链接、SEO、确定性构建、主题一致性检查
 - CI、外链检查工作流、博客部署模板和 Dependabot 配置
+- `dxbe-e2e` 独立仓库完成 GitHub Pages 端到端部署、smoke 和双语搜索验证
+- 可选首页浏览器语言跳转（`features.autoLanguage`），手动语言选择写入 localStorage
 - README、写作/主题/配置/部署/架构/设计检查文档和 ADR
 
 待完成：
 
-- 从 `dxbe` 模板创建博客仓库并开启 Pages（构建系统仓库不部署自身）
-- 首次博客生产部署与部署后 smoke test
 - Lighthouse CI、外链失败 issue 流程（可选）
 - 生产域名的最终视觉验收
 
@@ -56,7 +56,7 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 - 评论、后台 CMS、服务端搜索、阅读量、用户账户。
 - 兼容 Hexo 主题（EJS/Pug + Hexo helper API）。
 - Hexo 式 `{% %}` 标签、插件/渲染器体系、主题继承、主题市场。
-- MDX、分类（v1 只做标签）、RTL、自动语言重定向。
+- MDX、分类（v1 只做标签）、RTL。
 - 多作者协作、草稿审批流、定时发布的可视化管理。
 - AI 自动写文章、自动生成配图、自动摘要；引擎只渲染作者提供的内容。
 
@@ -130,7 +130,7 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 规则：
 
 - 不生成 `/zh/`，避免重复内容和 canonical 歧义。
-- 根路径永远是中文，不做 `Accept-Language` 或 `navigator.language` 自动跳转。语言切换交给页面上的显式链接。
+- 根路径永远是默认语言（内置配置为中文）。`features.autoLanguage` 开启时，只有默认语言首页会读取 `navigator.language` 跳转到有译文的语言首页；深链接不跳转，手动语言选择优先。
 - `hreflang`：中文页 `zh`，英文页 `en`，全站 `x-default` 指向中文根路径。
 - canonical 指向页面自身；不跨语言指向。
 - 所有链接以 `/` 结尾（`404.html`、`atom.xml`、`sitemap.xml`、`robots.txt` 除外），输出为目录 + `index.html`。
@@ -365,7 +365,7 @@ export default defineConfig({
     { key: 'about', path: '/about/' },
   ],
   pagination: { perPage: 10 },
-  features: { search: true, math: true },
+  features: { search: true, math: true, autoLanguage: true },
 })
 ```
 

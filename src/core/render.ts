@@ -78,6 +78,7 @@ function buildSiteView(loaded: LoadedConfig, lang: string): SiteView {
     social: config.identity.social,
     repository: config.identity.repository,
     license: config.site.license,
+    autoLanguage: config.features.autoLanguage,
     languages: Object.entries(config.locales.entries).map(([code, entry]) => ({
       code,
       label: entry.label,

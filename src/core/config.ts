@@ -83,9 +83,10 @@ const featuresSchema = z
   .object({
     search: z.boolean().default(true),
     math: z.boolean().default(true),
+    autoLanguage: z.boolean().default(true),
   })
   .strict()
-  .default({ search: true, math: true })
+  .default({ search: true, math: true, autoLanguage: true })
 
 const paginationSchema = z
   .object({

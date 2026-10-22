@@ -107,6 +107,21 @@ export const post: LayoutFn = (ctx) => html`
 
 `ctx.post.html` 和 `ctx.tocHtml` 是 `SafeHtml`，可以直接插值；普通字符串会被转义。不要对已经渲染好的正文再调用 `html` 或手动拼接。
 
+## 语言切换
+
+内置主题在 `<head>` 里调用 `languageBootstrap(ctx)`，并给语言切换链接加 `data-language="<lang>"`。自定义主题要启用相同行为，需要：
+
+```ts
+import { html, languageBootstrap } from 'dxbe/theme'
+
+// <head> 内
+${languageBootstrap(ctx)}
+// 语言链接
+<a href="${ctx.helpers.url(alternate.url)}" data-language="${alternate.lang}">${alternate.label}</a>
+```
+
+`features.autoLanguage` 关闭或没有译文时，函数返回空内容。是否跳转、跳转到哪里由 `ctx.site.autoLanguage`、`ctx.i18n.alternates` 和默认语言决定；主题不需要自己写重定向逻辑。
+
 ## 布局回退
 
 缺少布局时按下面的顺序回退：
