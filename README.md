@@ -26,10 +26,12 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install github:dx3906999/dxbe#v0.4.1
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.4.2/dxbe-0.4.2.tgz
 npx dxbe setup
 npx dxbe dev
 ```
+
+发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.4.2`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
 
 `setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。非交互使用：
 
@@ -223,6 +225,7 @@ npm pack --dry-run
 
 - `.github/workflows/ci.yml`：PR 和 `main` 推送；Ubuntu + Windows；跑 `npm run check`、确定性检查、actionlint，并验证 npm 包内容
 - `templates/deploy.yml`：博客实例的 Pages 部署模板，复制到博客仓库后使用
+- `.github/workflows/release.yml`：推送 `v*` tag 时构建 tarball 并创建 GitHub Release
 - `.github/workflows/external-links.yml`：每周检查内容里的外部链接
 - `.github/dependabot.yml`：每周更新 npm 和 GitHub Actions
 

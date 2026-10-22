@@ -24,7 +24,7 @@ import { stripHtml } from '../shared/html.ts'
 import type { SiteConfig } from './config.ts'
 import type { TocEntry } from './types.ts'
 
-const PIPELINE_VERSION = '2'
+const PIPELINE_VERSION = '3'
 
 export interface MarkdownResult {
   html: string
@@ -128,6 +128,7 @@ function cacheKey(config: SiteConfig, source: string): string {
       JSON.stringify({
         version: PIPELINE_VERSION,
         source,
+        base: config.site.base,
         math: config.features.math,
         allowHtml: config.markdown.allowHtml,
         shiki: config.markdown.shiki,
