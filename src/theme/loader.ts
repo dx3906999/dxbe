@@ -38,7 +38,7 @@ export interface LoadedTheme {
 const require = createRequire(import.meta.url)
 
 function packageRoot(): string {
-  return path.dirname(require.resolve('endpaper/package.json'))
+  return path.dirname(require.resolve('dxbe/package.json'))
 }
 
 function runningFromDist(): boolean {
@@ -106,7 +106,7 @@ export async function loadTheme(loaded: LoadedConfig, logger: Logger): Promise<L
   if (!themeDir) {
     throw new BuildError(`Theme "${loaded.config.theme.name}" was not found`, {
       code: 'THEME',
-      hint: 'it is neither in themes/ nor in the endpaper built-in themes',
+      hint: 'it is neither in themes/ nor in the dxbe built-in themes',
     })
   }
   const manifestFile = path.join(themeDir, 'theme.json')
@@ -239,7 +239,7 @@ export async function copySearchAsset(
       ]
   const source = candidates.find((candidate) => existsSync(candidate))
   if (!source) {
-    throw new BuildError('search.js was not found in the endpaper package', {
+    throw new BuildError('search.js was not found in the dxbe package', {
       code: 'THEME',
     })
   }

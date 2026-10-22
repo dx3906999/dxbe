@@ -1,4 +1,4 @@
-import { defineConfig } from 'endpaper/config'
+import { defineConfig } from 'dxbe/config'
 
 /**
  * Copy this file to site.config.ts, or run `npm run setup`.

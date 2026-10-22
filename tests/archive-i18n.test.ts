@@ -14,7 +14,7 @@ async function writeFixture(root: string, file: string, content: string): Promis
 
 describe('archive alternates with asymmetric locales', () => {
   it('does not link to a year archive that the other locale does not have', async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), 'endpaper-archive-'))
+    const root = await mkdtemp(path.join(os.tmpdir(), 'dxbe-archive-'))
     try {
       await writeFile(
         path.join(root, 'site.config.ts'),

@@ -44,7 +44,7 @@ export async function runDev(argv: string[] = process.argv.slice(2)): Promise<vo
   const logger = new Logger(args.flags.has('--verbose') ? 'debug' : 'info')
   const root = process.cwd()
   const cliEntry = process.argv[1]
-  if (!cliEntry) throw new Error('Unable to locate the endpaper CLI entry')
+  if (!cliEntry) throw new Error('Unable to locate the dxbe CLI entry')
 
   const baseOverride = args.options.get('--base')
   const theme = args.options.get('--theme')

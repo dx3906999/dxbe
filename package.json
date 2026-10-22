@@ -1,15 +1,15 @@
 {
-  "name": "endpaper",
-  "version": "0.3.0",
+  "name": "dxbe",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "Endpaper is a configurable static blog engine with built-in themes, i18n, search, and GitHub Pages deployment.",
+  "description": "A configurable static blog generator with bilingual routing, built-in themes, search, and GitHub Pages deployment.",
   "license": "MIT",
   "engines": {
     "node": ">=24"
   },
   "bin": {
-    "endpaper": "./dist/cli.js"
+    "dxbe": "./dist/cli.js"
   },
   "exports": {
     "./theme": {

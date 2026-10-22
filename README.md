@@ -1,8 +1,8 @@
-# endpaper
+# dxbe
 
-自研静态博客引擎。中文默认发布在站点根路径，英文在 `/en/`；主题可整体替换；构建时完成 Markdown、Shiki 代码高亮、KaTeX 公式和 Pagefind 索引。
+dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内容，构建时生成纯静态 HTML；默认中文发布在 `/`，英文发布在 `/en/`；主题、站点身份和部署方式都由配置决定。
 
-这个仓库是可安装的构建系统包，不是任何人的个人博客。`content/`、`site.config.ts` 和主题截图只用于演示、测试和验证构建链；博客仓库只保留 `content/`、`site.config.ts`、`public/`、`package.json` 和部署工作流。构建系统仓库本身只跑 CI，不部署站点。
+这个仓库是 dxbe 引擎本身，不是个人博客。`content/`、`site.config.ts` 和主题截图用于演示与测试。实际博客仓库只安装 `dxbe`，保留内容、配置、`public/` 和一条部署工作流；引擎仓库只跑 CI，不部署站点。
 
 ![folio 主题首页](docs/screenshots/folio-home.png)
 
@@ -16,94 +16,94 @@
 - Pagefind 全文搜索，按语言过滤，排除代码和公式
 - KaTeX 构建时渲染，仅数学页面加载 CSS
 - 确定性构建、内部链接检查、SEO 检查、主题一致性测试
-- 构建系统仓库跑 Ubuntu + Windows CI；博客实例通过 `templates/deploy.yml` 部署 Pages，部署后 smoke test
+- 引擎仓库跑 Ubuntu + Windows CI；博客实例通过 GitHub Pages 部署，部署后自动 smoke test
 
-## 构建系统开发
+## 快速开始
 
-需要 Node.js 24 或更高版本。仓库里的 `content/` 是演示/测试站点。
-
-```bash
-npm ci
-npm run dev
-npm run check
-```
-
-修改 `src/`、`themes/` 或演示内容会触发 dev server 重建。构建 npm 包：
-
-```bash
-npm run build:package
-```
-
-## 创建博客仓库
-
-博客仓库不需要复制 `src/` 或 `themes/`，只安装引擎并放内容：
+需要 Node.js 24 或更高版本。
 
 ```bash
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install github:dx3906999/blog-engine
-npx endpaper setup
-npx endpaper dev
+npm install github:dx3906999/dxbe#v0.4.0
+npx dxbe setup
+npx dxbe dev
 ```
 
-`setup` 会生成 `site.config.ts`，询问作者、站点标题、英文站点信息、域名和主题。非交互使用：
+`setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。非交互使用：
 
 ```bash
-npx endpaper setup --yes --force --name "Your Name" --url "https://example.com" --theme folio
+npx dxbe setup --yes --force \
+  --name "Your Name" \
+  --url "https://example.com" \
+  --theme folio
 ```
 
 博客仓库最终只需要：
 
 ```
 content/
-public/
+public/                    # 可选：favicon、CNAME 等
+themes/                    # 可选：覆盖或新增主题
 site.config.ts
 package.json
 .github/workflows/deploy.yml
 ```
 
-引擎、主题、检查脚本和 Pagefind 都由 `endpaper` 依赖提供。
+引擎、内置主题、检查脚本和 Pagefind 都由 `dxbe` 依赖提供。
 
-## 博客仓库脚本
+## 命令
 
 在博客仓库的 `package.json` 里加：
 
 ```json
 {
   "scripts": {
-    "dev": "endpaper dev",
-    "build": "endpaper build",
-    "build:all": "endpaper check",
-    "preview": "endpaper preview",
-    "new": "endpaper new",
-    "clean": "endpaper clean",
-    "setup": "endpaper setup"
+    "dev": "dxbe dev",
+    "build": "dxbe build",
+    "build:all": "dxbe check",
+    "preview": "dxbe preview",
+    "new": "dxbe new",
+    "clean": "dxbe clean",
+    "setup": "dxbe setup"
   }
 }
 ```
 
 | 命令 | 作用 |
 | --- | --- |
-| `endpaper dev` | 本地开发，监听内容、主题和配置 |
-| `endpaper build` | 生成 `dist/`，不建搜索索引 |
-| `endpaper check` | 构建、链接、SEO、主题一致性、Pagefind 索引 |
-| `endpaper index` | 只重建 Pagefind 索引 |
-| `endpaper preview` | 静态服务 `dist/` |
-| `endpaper new "标题" --slug hello-world --lang zh` | 新建文章目录和 frontmatter |
-| `endpaper check:deterministic` | 连续构建两次并比较产物 |
-| `endpaper check:theme` | 用当前内容构建全部内置主题 |
-| `endpaper clean` | 删除 `dist/`、缓存和开发产物 |
+| `dxbe dev` | 本地开发，监听内容、主题和配置 |
+| `dxbe build` | 生成 `dist/`，不建搜索索引 |
+| `dxbe check` | 构建、链接、SEO、主题一致性、Pagefind 索引 |
+| `dxbe index` | 只重建 Pagefind 索引 |
+| `dxbe preview` | 静态服务 `dist/` |
+| `dxbe new "标题" --slug hello-world --lang zh` | 新建文章目录和 frontmatter |
+| `dxbe check:deterministic` | 连续构建两次并比较产物 |
+| `dxbe check:theme` | 用当前内容构建全部内置主题 |
+| `dxbe clean` | 删除 `dist/`、缓存和开发产物 |
 
 生产预览：
 
 ```bash
-npx endpaper build
-npx endpaper index
-npx endpaper preview
+npx dxbe build
+npx dxbe index
+npx dxbe preview
 ```
 
-构建系统仓库自己的开发脚本仍然是 `npm run dev`、`npm run check`、`npm run build:package`。
+## 构建流程
+
+```
+site.config.ts + content/
+  → frontmatter 校验
+  → Markdown、Shiki、KaTeX
+  → 语言、译文、标签、归档、分页
+  → 主题布局
+  → dist/ + Atom + sitemap + robots
+  → Pagefind 索引
+```
+
+构建先写入临时目录，完成后替换 `dist/`，不会留下半成品。Pagefind 是独立步骤，只扫描带 `data-pagefind-body` 的文章和页面。
 
 ## 站点配置
 
@@ -124,7 +124,7 @@ npx endpaper preview
 - `pagination.perPage`：每页文章数
 - `features.search` / `features.math`：搜索和公式
 
-所有内部链接由 helper 生成。项目页部署不要手写 `/` 开头的资源路径。
+所有内部链接由 helper 生成。项目页部署不要手写 `/` 开头的资源路径。完整字段和非交互参数见 [docs/customization.md](docs/customization.md)。
 
 ## 内容
 
@@ -174,21 +174,21 @@ draft: false
 本地预览某套主题：
 
 ```bash
-npx endpaper dev --theme=orbital
-npx endpaper dev --theme=scholar
+npx dxbe dev --theme=orbital
+npx dxbe dev --theme=scholar
 ```
 
-主题目录包含 `theme.json`、`theme.ts`、`layouts/`、`assets/`、`i18n/`。新增主题的接口说明见 [docs/theming.md](docs/theming.md)，三套主题的截图见 [docs/theme-gallery.md](docs/theme-gallery.md)。
+主题目录包含 `theme.json`、`theme.ts`、`layouts/`、`assets/`、`i18n/`。自定义主题放在博客仓库的 `themes/<name>/`，同名主题会覆盖内置主题；外部主题从 `dxbe/theme` 导入公共 API。接口说明见 [docs/theming.md](docs/theming.md)，截图见 [docs/theme-gallery.md](docs/theme-gallery.md)。
 
-## 部署博客实例
+## 部署到 GitHub Pages
 
-构建系统仓库不部署自身。部署工作流是 `templates/deploy.yml`，由博客仓库复制后使用。
+引擎仓库不部署自身。部署工作流是 `templates/deploy.yml`，复制到博客仓库后使用。
 
-1. 创建博客仓库，`npm install github:dx3906999/blog-engine`，放好 `content/`、`site.config.ts` 和 `public/`。
+1. 创建博客仓库，安装 `dxbe`，放好 `content/`、`site.config.ts` 和 `public/`。免费计划下仓库必须是 public。
 2. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
-3. Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。
-4. 推送博客仓库的 `main`；工作流会完成主题检查、构建、Pagefind、上传 artifact 和部署。
-5. 部署后运行 smoke test，检查中英文首页、feed、sitemap、404 和搜索索引。
+3. 在 Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。
+4. 推送 `main`，或手动运行 **Deploy**。
+5. 工作流完成主题检查、构建、链接/SEO 检查、Pagefind 索引、上传 artifact、部署和 smoke test。
 
 项目页部署时，站点根是 `https://<user>.github.io/<repo>/`。`actions/configure-pages` 会注入 `origin` 和 `base_path`，不需要在配置里写仓库名。
 
@@ -198,40 +198,60 @@ npx endpaper dev --theme=scholar
 - 在 Pages 设置里填写域名并按 GitHub 的说明配置 DNS
 - 开启 Enforce HTTPS
 
-GitHub Pages 没有服务端重定向和自定义响应头；站点总大小限制 1 GB，带宽 100 GB/月，构建频率 10 次/小时。详细部署说明见 [docs/deployment.md](docs/deployment.md)。
+GitHub Pages 没有服务端重定向和自定义响应头；站点总大小限制 1 GB，带宽 100 GB/月，构建频率 10 次/小时。详细说明见 [docs/deployment.md](docs/deployment.md)。
+
+## 引擎开发
+
+仓库里的 `content/` 是演示/测试站点。需要 Node.js 24 或更高版本。
+
+```bash
+npm ci
+npm run dev
+npm run check
+```
+
+修改 `src/`、`themes/` 或演示内容会触发 dev server 重建。构建 npm 包：
+
+```bash
+npm run build:package
+npm pack --dry-run
+```
+
+`npm run check` 包含 lint、类型检查、单元/集成测试，以及一次完整构建、链接检查、SEO 检查、主题一致性检查和 Pagefind 索引。
 
 ## CI/CD
 
-- `.github/workflows/ci.yml`：构建系统仓库的 CI；PR 和 `main` 推送；Ubuntu + Windows；跑 `npm run check`、确定性检查、actionlint
-- `templates/deploy.yml`：博客实例的部署模板，复制到博客仓库后使用；校验 → 主题检查 → `configure-pages` → 生产构建 → 输出检查 → Pagefind → 上传 artifact → 部署 → smoke test
+- `.github/workflows/ci.yml`：PR 和 `main` 推送；Ubuntu + Windows；跑 `npm run check`、确定性检查、actionlint，并验证 npm 包内容
+- `templates/deploy.yml`：博客实例的 Pages 部署模板，复制到博客仓库后使用
 - `.github/workflows/external-links.yml`：每周检查内容里的外部链接
 - `.github/dependabot.yml`：每周更新 npm 和 GitHub Actions
 
 ## 目录
 
-构建系统仓库：
+引擎仓库：
 
 ```
-themes/             folio / orbital / scholar（随包发布）
-src/core/           配置、扫描、Markdown、路由、渲染、输出
-src/theme/          主题 API、加载器、资源、i18n
-src/cli/            bin 子命令、检查、Pagefind、开发服务器
-src/assets/         search.js（随包发布）
-scripts/            包构建时复制主题资源和 search.js
-tests/              单元和集成测试
-docs/               计划、架构、写作、主题、部署、设计检查
-content/            演示站点（不随包发布）
-site.config.ts      演示配置（不随包发布）
+themes/              folio / orbital / scholar（随包发布）
+src/core/            配置、扫描、Markdown、路由、渲染、输出
+src/theme/           主题 API、加载器、资源、i18n
+src/cli/             bin 子命令、检查、Pagefind、开发服务器
+src/assets/          search.js（随包发布）
+scripts/             包构建时复制主题资源和 search.js
+tests/               单元和集成测试
+docs/                架构、写作、主题、部署、设计检查
+content/             演示站点（不随包发布）
+site.config.ts       演示配置（不随包发布）
 templates/deploy.yml 博客仓库部署模板
 ```
 
 博客仓库：
 
 ```
-content/            文章和页面
-public/             favicon、CNAME 等
-site.config.ts      站点配置
-package.json        依赖 endpaper
+content/             文章和页面
+public/              可选的静态文件
+themes/              可选的自定义主题
+site.config.ts       站点配置
+package.json         依赖 dxbe
 .github/workflows/deploy.yml
 ```
 

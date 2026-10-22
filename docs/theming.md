@@ -2,7 +2,7 @@
 
 主题是独立目录，核心只负责内容、路由和渲染数据，主题负责把数据变成 HTML。
 
-`folio`、`orbital`、`scholar` 随 `endpaper` 包发布。博客仓库不需要复制它们；把自定义主题放在博客仓库的 `themes/<name>/`，同名主题会覆盖内置主题。
+`folio`、`orbital`、`scholar` 随 `dxbe` 包发布。博客仓库不需要复制它们；把自定义主题放在博客仓库的 `themes/<name>/`，同名主题会覆盖内置主题。
 
 ## 目录
 
@@ -50,7 +50,7 @@ themes/<name>/
 ## theme.ts
 
 ```ts
-import { defineTheme } from 'endpaper/theme'
+import { defineTheme } from 'dxbe/theme'
 import { z } from 'zod'
 import { post } from './layouts/post.ts'
 
@@ -95,7 +95,7 @@ type LayoutFn = (ctx: ThemeContext) => string | SafeHtml
 核心提供自动转义的 `html` 和用于预渲染内容的 `raw`：
 
 ```ts
-import { html, raw } from 'endpaper/theme'
+import { html, raw } from 'dxbe/theme'
 
 export const post: LayoutFn = (ctx) => html`
   <article>
@@ -145,7 +145,7 @@ toc.title
 ## 一致性测试
 
 ```bash
-npx endpaper check:theme -- themes/my-theme
+npx dxbe check:theme -- themes/my-theme
 ```
 
 不传参数时遍历 `themes/` 下所有主题。测试会用固定内容构建，检查：
@@ -163,7 +163,7 @@ npx endpaper check:theme -- themes/my-theme
 2. 修改 `theme.json` 的 `name`，修改 `theme.ts` 的配置 schema 和布局。
 3. 在 `assets/css/site.css` 建立自己的排版系统。
 4. 在 `i18n/` 补齐中英文。
-5. 运行 `npx endpaper check:theme -- themes/<name>`。
+5. 运行 `npx dxbe check:theme -- themes/<name>`。
 6. 用 360 / 768 / 1280 / 1440 宽度和亮/暗模式检查截图。
 7. 把截图和设计定位加到 `docs/theme-gallery.md`。
 

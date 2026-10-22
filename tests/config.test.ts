@@ -7,7 +7,7 @@ import { loadConfig } from '../src/core/config.ts'
 const tempDirs: string[] = []
 
 async function fixture(source: string): Promise<string> {
-  const dir = await mkdtemp(path.join(os.tmpdir(), 'endpaper-config-'))
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'dxbe-config-'))
   tempDirs.push(dir)
   await writeFile(path.join(dir, 'site.config.ts'), source, 'utf8')
   return dir

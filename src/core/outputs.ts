@@ -62,7 +62,7 @@ export function renderAtom(loaded: LoadedConfig, lang: string, posts: Post[]): s
   <link rel="self" type="application/atom+xml" href="${escapeXml(feedUrl)}"/>
   <id>${escapeXml(feedUrl)}</id>
   <updated>${updated}</updated>
-  <generator>endpaper</generator>
+  <generator>dxbe</generator>
   <author>
     <name>${escapeXml(author.name)}</name>${authorEmail}
   </author>

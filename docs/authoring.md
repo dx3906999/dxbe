@@ -54,14 +54,14 @@ draft: false
 - 同一语言内 slug 和 `translationKey` 都不能重复。
 - 标签可以是中文，URL 会被百分号编码；改名会改变标签页 URL。
 - 没有译文的文章只出现在自己语言的首页、归档、feed 和搜索里。
-- 草稿在生产构建中排除；未来日期的文章默认也排除，`npx endpaper build --future` 可以包含。
+- 草稿在生产构建中排除；未来日期的文章默认也排除，`npx dxbe build --future` 可以包含。
 - 原始 HTML 默认关闭。需要时在 `site.config.ts` 加 `markdown: { allowHtml: true }`，构建会走 sanitize。
 - 所有内部链接用站点路径；项目页部署时构建会加 `base`。不要手写完整 `https://` 链接指向站内页面。
 
 ## 新建文章
 
 ```bash
-npx endpaper new "这个站点是怎么搭起来的" --slug how-this-site-works --lang zh --tags 工程,静态站点
+npx dxbe new "这个站点是怎么搭起来的" --slug how-this-site-works --lang zh --tags 工程,静态站点
 ```
 
 命令会创建：

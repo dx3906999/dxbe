@@ -127,7 +127,7 @@ export interface ThemeDefinition {
   layouts: Record<string, LayoutFn>
 }
 
-export const themeSymbol = Symbol.for('blog-engine.theme')
+export const themeSymbol = Symbol.for('dxbe.theme')
 
 export interface Theme extends ThemeDefinition {
   readonly [themeSymbol]: true

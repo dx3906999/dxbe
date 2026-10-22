@@ -35,7 +35,7 @@ export async function runNew(argv: string[] = process.argv.slice(2)): Promise<vo
   const args = parseArgs(argv)
   const title = args.positionals.join(' ').trim()
   if (!title) {
-    throw new Error('Usage: endpaper new "Post title" --slug hello-world --lang zh')
+    throw new Error('Usage: dxbe new "Post title" --slug hello-world --lang zh')
   }
 
   const loaded = await loadConfig({ root: process.cwd(), production: false })

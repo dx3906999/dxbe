@@ -1,16 +1,16 @@
-# 自研静态博客系统 — 实施计划
+# 静态博客系统 — 实施计划
 
-- 版本：0.3（核心生成器、三套主题、CI/CD、文档已实现）
+- 版本：0.4（核心生成器、三套主题、CI/CD、文档已实现）
 - 日期：2026-10-22
 - 状态：Phase 0–4 已完成，Phase 5 部分完成
-- 代码仓库：待定（`<user>/<repo>`）
+- 代码仓库：https://github.com/dx3906999/dxbe
 - 生产地址：待定（GitHub Pages 或自定义域名）
 
 ## 0. 摘要
 
-用 Node.js 24+ / TypeScript 自研静态站点生成器（SSG）。中文为默认语言，发布在站点根路径；英文发布在 `/en/`，不生成 `/zh/`，不做浏览器语言自动跳转。内容为 Markdown + YAML frontmatter，构建时完成渲染、Shiki 代码高亮、KaTeX 公式和 Pagefind 全文索引。主题是可替换的 TS 模块，带独立配置、静态资源、多语言文案和一致性测试。
+用 Node.js 24+ / TypeScript 实现静态站点生成器（SSG）。中文为默认语言，发布在站点根路径；英文发布在 `/en/`，不生成 `/zh/`，不做浏览器语言自动跳转。内容为 Markdown + YAML frontmatter，构建时完成渲染、Shiki 代码高亮、KaTeX 公式和 Pagefind 全文索引。主题是可替换的 TS 模块，带独立配置、静态资源、多语言文案和一致性测试。
 
-站点身份全部配置化：作者、域名、仓库、语言、导航、许可证、主题都集中在 `site.config.ts`，不写死在代码或模板里。引擎作为 npm 包发布，博客仓库安装 `endpaper` 后运行 `endpaper setup` 填入自己的信息即可。内置三套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术），不是换色皮肤。
+站点身份全部配置化：作者、域名、仓库、语言、导航、许可证、主题都集中在 `site.config.ts`，不写死在代码或模板里。引擎作为 npm 包发布，博客仓库安装 `dxbe` 后运行 `dxbe setup` 填入自己的信息即可。内置三套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术），不是换色皮肤。
 
 CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；CD 通过 GitHub Actions artifact 发布到 GitHub Pages。预计 6 个阶段，按当前协作方式约 7–9 个批次完成。
 
@@ -18,8 +18,8 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 
 已完成：
 
-- 引擎 npm 包化：单一 `endpaper` bin、tsup 构建、内置主题随包发布、博客仓库只依赖包
-- 配置 schema、`site.config.ts` / `site.config.example.ts`、`endpaper setup`
+- 引擎 npm 包化：单一 `dxbe` bin、tsup 构建、内置主题随包发布、博客仓库只依赖包
+- 配置 schema、`site.config.ts` / `site.config.example.ts`、`dxbe setup`
 - 内容扫描、frontmatter 校验、Markdown/Shiki/KaTeX 管线、Markdown 缓存
 - 路由、分页、标签、归档、Atom、sitemap、robots、404、manifest
 - 中文根路径 / 英文 `/en/`、译文关联、hreflang、语言切换器
@@ -32,7 +32,7 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 
 待完成：
 
-- 从 `endpaper` 模板创建博客仓库并开启 Pages（构建系统仓库不部署自身）
+- 从 `dxbe` 模板创建博客仓库并开启 Pages（构建系统仓库不部署自身）
 - 首次博客生产部署与部署后 smoke test
 - Lighthouse CI、外链失败 issue 流程（可选）
 - 生产域名的最终视觉验收
@@ -41,13 +41,13 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 
 ### 1.1 目标
 
-- 自研生成器，不依赖 Hexo / Astro / Hugo / VitePress 的构建逻辑。
+- 构建逻辑独立实现，不依赖 Hexo / Astro / Hugo / VitePress。
 - 中文默认、根路径；英文 `/en/`；两种语言共用一套主题和路由实现。
 - 支持标签、归档、分页、Atom、sitemap、robots、404、SEO/OG、JSON-LD。
 - 支持构建时 KaTeX 数学公式、Pagefind 全文搜索、暗色模式。
 - 主题可整体替换：目录、manifest、配置 schema、layouts、assets、i18n 五件套。
 - 内置三套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术），每套有自己的排版系统和布局逻辑。
-- 站点身份、URL、语言、导航、许可证、主题选择全部配置化，不写死作者信息；博客仓库通过 npm 依赖 `endpaper` 复用引擎。
+- 站点身份、URL、语言、导航、许可证、主题选择全部配置化，不写死作者信息；博客仓库通过 npm 依赖 `dxbe` 复用引擎。
 - 部署到 GitHub Pages，CI/CD 全自动，发布可回滚。
 - 本地开发在 Windows 上顺畅，CI 在 Linux 上复现同一结果。
 
@@ -82,8 +82,8 @@ CI 覆盖类型检查、Lint、测试、构建、链接、SEO 和主题契约；
 | 主题形态 | TS 模块（函数式布局），不是 EJS/Pug |
 | 内置主题 | `folio`（默认）、`orbital`、`scholar` |
 | 站点身份 | 全部在 `site.config.ts`，代码和主题中不写死作者/域名/仓库 |
-| 复用方式 | npm 依赖 `endpaper` + `endpaper setup` + `site.config.example.ts` |
-| 引擎包名 | 暂定 `endpaper`，作为可复用引擎；站点实例靠配置区分 |
+| 复用方式 | npm 依赖 `dxbe` + `dxbe setup` + `site.config.example.ts` |
+| 引擎包名 | 暂定 `dxbe`，作为可复用引擎；站点实例靠配置区分 |
 | 搜索 | Pagefind，构建后扫描 `dist/` |
 | 数学 | KaTeX，构建时渲染 |
 | 部署 | GitHub Actions artifact → GitHub Pages |
@@ -234,7 +234,7 @@ themes/<name>/
 `theme.ts`：
 
 ```ts
-import { defineTheme, html, raw } from 'endpaper/theme'
+import { defineTheme, html, raw } from 'dxbe/theme'
 import { z } from 'zod'
 
 export default defineTheme({
@@ -311,7 +311,7 @@ export default defineTheme({
 - 主题的 `search` 布局只提供容器；核心提供 `assets/search.js`，负责懒加载索引、防抖、`?q=` 同步、键盘导航和结果高亮。样式类名由主题定义。
 - 搜索页：`/search/` 与 `/en/search/`；无 JS 时显示说明和站内链接。
 - 子路径部署时，Pagefind 资源通过 `url('/pagefind/pagefind.js')` 加载，不能写死 `/pagefind/`。
-- 预留适配层：如果将来自研索引（`Intl.Segmenter` + 中文 bigram 倒排），只替换 `search.js`，主题无感。
+- 预留适配层：如果将来替换索引实现（`Intl.Segmenter` + 中文 bigram 倒排），只替换 `search.js`，主题无感。
 - 开发模式下 Pagefind 索引按需重建；如果重建慢，提供 `npm run index` 手动触发。
 
 ### 2.6 数学公式
@@ -331,8 +331,8 @@ export default defineTheme({
 - 代码、主题、i18n 文案中不允许出现作者姓名、GitHub 用户名、仓库名、域名。
 - 主题只读取 `ctx.site.*`、`ctx.i18n.*`、`ctx.site.license` 等注入值。
 - 英文站点信息不是翻译中文，而是 `locales.entries.en` 下独立配置。
-- `site.config.example.ts` 提供完整注释和占位值；`endpaper setup` 生成或更新 `site.config.ts`。
-- 博客仓库只安装 `endpaper` 依赖，放 `content/`、`site.config.ts`、`public/` 和部署工作流；引擎和内置主题不复制。
+- `site.config.example.ts` 提供完整注释和占位值；`dxbe setup` 生成或更新 `site.config.ts`。
+- 博客仓库只安装 `dxbe` 依赖，放 `content/`、`site.config.ts`、`public/` 和部署工作流；引擎和内置主题不复制。
 
 配置形态：
 
@@ -389,7 +389,7 @@ URL 与仓库解耦：
 文档与模板：
 
 - `docs/customization.md`：配置字段、语言、域名、主题切换、内容迁移。
-- `README.md`：构建系统开发用 `npm ci` → `npm run dev`；博客实例用 `npm install github:dx3906999/blog-engine` → `endpaper setup` → `endpaper dev`。
+- `README.md`：构建系统开发用 `npm ci` → `npm run dev`；博客实例用 `npm install github:dx3906999/dxbe` → `dxbe setup` → `dxbe dev`。
 - `docs/authoring.md` 和 `docs/theming.md` 不出现当前作者的私人信息，示例使用中性作者名。
 - 内容目录附 `content/README.md`，说明哪些是示例、可以整体删除。
 
@@ -1044,7 +1044,7 @@ jobs:
 | i18n canonical/hreflang 错误 | SEO 重复内容、语言错配 | 自动 SEO 校验；不生成 `/zh/`；x-default 固定中文根 |
 | GitHub Pages 子路径资源 404 | 生产白屏 | Phase 0 就部署项目页；所有 URL 走 helper；构建后用子路径验收 |
 | 中文标签 URL 编码问题 | 标签页 404 | NFC 规范化、碰撞检测、百分号编码；Phase 1 在 Pages 上实测 |
-| Pagefind 中文召回不佳 | 搜索体验差 | 用真实中文 fixture 测试；保留自研 bigram 索引适配层 |
+| Pagefind 中文召回不佳 | 搜索体验差 | 用真实中文 fixture 测试；保留中文 bigram 索引适配层 |
 | 构建时间随文章增长 | CI 变慢 | 单文件 Markdown 缓存、Shiki 单例、并发限制；监控构建耗时 |
 | Windows 路径差异 | 本地/CI 行为不一致 | 全程 `node:path`、`pathToFileURL`；CI 加 Windows job |
 | CDN 缓存导致更新延迟 | 发布后看到旧页面 | 资源内容哈希；HTML 接受约 10 分钟 TTL；发布后 smoke test 等待 |
@@ -1078,7 +1078,7 @@ jobs:
 
 其他人复用时：
 
-- 创建博客仓库 → `npm install github:dx3906999/blog-engine` → `endpaper setup` → 写 `content/` → 选择主题 → push。
+- 创建博客仓库 → `npm install github:dx3906999/dxbe` → `dxbe setup` → 写 `content/` → 选择主题 → push。
 - 不需要改代码、主题模板或 CI 文件。
 - 使用自己的域名：在 setup 中填写，或设置 `customDomain`，构建生成 `CNAME`。
 
