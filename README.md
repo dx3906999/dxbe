@@ -184,7 +184,7 @@ npx dxbe dev --theme=scholar
 
 ## 部署到 GitHub Pages
 
-引擎仓库不部署自身。部署工作流是 `templates/deploy.yml`，复制到博客仓库后使用。
+引擎仓库不部署自身。部署工作流是 `templates/deploy.yml`，复制到博客仓库后使用。完整的部署链路在 [dxbe-e2e](https://github.com/dx3906999/dxbe-e2e) 上持续验证，线上地址是 [dx3906999.github.io/dxbe-e2e](https://dx3906999.github.io/dxbe-e2e/)。
 
 1. 创建博客仓库，安装 `dxbe`，放好 `content/`、`site.config.ts` 和 `public/`。免费计划下仓库必须是 public。
 2. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
