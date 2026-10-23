@@ -52,6 +52,7 @@ function reloadScript(base: string): string {
   overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:99999;overflow:auto;margin:0;padding:24px;background:#1b1b1b;color:#ffb4b4;font:13px/1.6 ui-monospace,monospace;white-space:pre-wrap';
   document.body.appendChild(overlay);
   const events = new EventSource('${base}/__dev/events');
+  window.addEventListener('pagehide', () => events.close(), { once: true });
   events.addEventListener('build-error', (event) => {
     overlay.textContent = event.data || 'Build failed';
     overlay.style.display = 'block';
@@ -136,7 +137,9 @@ export async function startStaticServer(options: StaticServerOptions): Promise<S
         })
         response.write('retry: 1000\n\n')
         clients.add(response)
-        request.on('close', () => clients.delete(response))
+        const cleanup = () => clients.delete(response)
+        request.on('close', cleanup)
+        response.on('close', cleanup)
         return
       }
 
