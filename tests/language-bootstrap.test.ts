@@ -8,21 +8,26 @@ function context(
     lang?: string
     defaultLang?: string
     base?: string
-    alternates?: Array<{ lang: string; label: string; url: string }>
+    languages?: Array<{ code: string; label: string; url: string }>
   } = {},
 ): ThemeContext {
   const lang = options.lang ?? 'zh'
   const defaultLang = options.defaultLang ?? 'zh'
   const base = options.base ?? '/blog/'
+  const languages = options.languages ?? [
+    { code: defaultLang, label: 'Default', url: base },
+    { code: 'en', label: 'English', url: `${base}en/` },
+  ]
   return {
     site: {
       autoLanguage: options.autoLanguage ?? true,
       base,
       defaultLang,
+      languages,
     },
     i18n: {
       lang,
-      alternates: options.alternates ?? [{ lang: 'en', label: 'English', url: '/en/' }],
+      alternates: [],
     },
     helpers: {
       url: (pathname: string) => `${base}${pathname.replace(/^\//, '')}`,
@@ -36,27 +41,27 @@ describe('language bootstrap', () => {
 
     expect(script).toContain('navigator.languages')
     expect(script).toContain('dxbe.lang:/blog/')
+    expect(script).toContain('"zh":"/blog/"')
     expect(script).toContain('"en":"/blog/en/"')
     expect(script).toContain('location.replace')
+    expect(script).toContain('dxbe.lang.redirected:/blog/')
+    expect(script).toContain('sessionStorage')
     expect(script).toContain('if (!true) return;')
   })
 
   it('still records an explicit language choice on non-default pages', () => {
-    const script = unwrap(
-      languageBootstrap(
-        context({
-          lang: 'en',
-          alternates: [{ lang: 'zh', label: '中文', url: '/' }],
-        }),
-      ),
-    )
+    const script = unwrap(languageBootstrap(context({ lang: 'en' })))
 
     expect(script).toContain('data-language')
     expect(script).toContain('if (!false) return;')
   })
 
-  it('returns nothing when autoLanguage is off or there is no alternate', () => {
+  it('returns nothing when autoLanguage is off or there is only one language', () => {
     expect(unwrap(languageBootstrap(context({ autoLanguage: false })))).toBe('')
-    expect(unwrap(languageBootstrap(context({ alternates: [] })))).toBe('')
+    expect(
+      unwrap(
+        languageBootstrap(context({ languages: [{ code: 'zh', label: '中文', url: '/blog/' }] })),
+      ),
+    ).toBe('')
   })
 })

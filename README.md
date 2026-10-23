@@ -26,12 +26,12 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.5.1/dxbe-0.5.1.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.5.2/dxbe-0.5.2.tgz
 npx dxbe setup
 npx dxbe dev
 ```
 
-发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.5.1`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
+发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.5.2`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
 
 `setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。非交互使用：
 
@@ -129,7 +129,7 @@ site.config.ts + content/
 - `features.search` / `features.math`：搜索和公式
 - `features.autoLanguage`：首页按浏览器语言跳转，默认开启；深链接不跳转，手动选择会记住
 
-自动语言选择只作用于默认语言首页；文章、页面和其他语言首页不会重定向。用户点过语言切换后，选择会写入 localStorage，后续访问首页按这个选择跳转。设置 `features.autoLanguage: false` 可完全关闭。
+自动语言选择只作用于默认语言首页；文章、页面和其他语言首页不会重定向。按浏览器偏好顺序取第一个站点支持的语言，如果它就是默认语言则停留。每个标签页只自动跳转一次，之后返回首页不会被反复重定向。用户点过语言切换后，选择会写入 localStorage，后续访问首页优先按这个选择。设置 `features.autoLanguage: false` 可完全关闭。
 
 所有内部链接由 helper 生成。项目页部署不要手写 `/` 开头的资源路径。完整字段和非交互参数见 [docs/customization.md](docs/customization.md)。
 

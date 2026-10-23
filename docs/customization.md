@@ -8,7 +8,7 @@
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.5.1/dxbe-0.5.1.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.5.2/dxbe-0.5.2.tgz
 npx dxbe setup
 npx dxbe dev
 ```
@@ -85,7 +85,7 @@ npx dxbe setup --yes --force \
 | `features.autoLanguage` | 首页按浏览器语言跳转，默认开启；手动语言选择会记住 |
 | `markdown.allowHtml` | 是否允许原始 HTML（默认 false，开启时 sanitize） |
 
-`features.autoLanguage` 只在默认语言首页读取 `navigator.languages`，并跳转到存在译文的语言首页。文章、页面和其他语言首页不会自动重定向；语言切换链接会写入 localStorage，后续访问首页优先按手动选择。
+`features.autoLanguage` 只在默认语言首页读取 `navigator.languages`，按偏好顺序匹配第一个站点支持的语言；如果匹配的是默认语言就停留。每个标签页只自动跳转一次，文章、页面和其他语言首页不会自动重定向；语言切换链接会写入 localStorage，后续访问首页优先按手动选择。
 
 主题配置由主题的 zod schema 校验。比如：
 

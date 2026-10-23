@@ -130,17 +130,19 @@ export type LayoutFn = (ctx: ThemeContext) => string | SafeHtml
  */
 export function languageBootstrap(ctx: ThemeContext): SafeHtml {
   if (!ctx.site.autoLanguage) return raw('')
-  const alternates = ctx.i18n.alternates.filter((alternate) => alternate.lang !== ctx.i18n.lang)
-  if (alternates.length === 0) return raw('')
+  const languages = ctx.site.languages
+  if (languages.length < 2) return raw('')
 
   const targets: Record<string, string> = {}
-  for (const alternate of alternates) {
-    targets[alternate.lang] = ctx.helpers.url(alternate.url)
+  for (const language of languages) {
+    targets[language.code] = language.url
   }
   const home = ctx.helpers.url('/')
-  const isDefaultHome = ctx.i18n.lang === ctx.site.defaultLang ? 'true' : 'false'
+  const currentLang = ctx.i18n.lang
+  const isDefaultHome = currentLang === ctx.site.defaultLang ? 'true' : 'false'
   const script = `(() => {
   const key = ${jsonForScript(`dxbe.lang:${ctx.site.base}`)};
+  const redirectedKey = ${jsonForScript(`dxbe.lang.redirected:${ctx.site.base}`)};
   const supported = ${jsonForScript(targets)};
   try {
     document.addEventListener('click', (event) => {
@@ -156,11 +158,14 @@ export function languageBootstrap(ctx: ThemeContext): SafeHtml {
     let stored = null;
     try { stored = localStorage.getItem(key); } catch {}
     if (stored) {
-      if (${isDefaultHome} && stored !== ${jsonForScript(ctx.i18n.lang)} && Object.prototype.hasOwnProperty.call(supported, stored)) {
+      if (${isDefaultHome} && stored !== ${jsonForScript(currentLang)} && Object.prototype.hasOwnProperty.call(supported, stored)) {
         location.replace(supported[stored] + location.search + location.hash);
       }
       return;
     }
+    let redirected = null;
+    try { redirected = sessionStorage.getItem(redirectedKey); } catch {}
+    if (redirected) return;
     if (!${isDefaultHome}) return;
     const home = ${jsonForScript(home)};
     const path = location.pathname.replace(new RegExp('/+$'), '') || '/';
@@ -173,7 +178,10 @@ export function languageBootstrap(ctx: ThemeContext): SafeHtml {
       const tag = String(value || '').toLowerCase();
       const match = Object.keys(supported).find((code) => tag === code || tag.startsWith(code + '-'));
       if (match) {
-        location.replace(supported[match] + location.search + location.hash);
+        if (match !== ${jsonForScript(currentLang)}) {
+          try { sessionStorage.setItem(redirectedKey, '1'); } catch {}
+          location.replace(supported[match] + location.search + location.hash);
+        }
         return;
       }
     }

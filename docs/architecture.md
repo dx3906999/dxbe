@@ -41,7 +41,7 @@ site.config.ts
 
 ## 语言选择
 
-`features.autoLanguage` 开启时，默认语言首页会嵌入主题 API 提供的 `languageBootstrap(ctx)` 脚本：读取 `navigator.languages`，只在默认语言首页跳转到有对应译文的语言首页；使用 `location.replace`，避免历史记录回退陷阱。文章、页面和其他语言首页不重定向。语言切换链接带 `data-language`，点击后把选择写入按站点 base 区分的 localStorage key；已有选择优先于浏览器语言。
+`features.autoLanguage` 开启时，默认语言首页会嵌入主题 API 提供的 `languageBootstrap(ctx)` 脚本：读取 `navigator.languages`，按偏好顺序匹配第一个站点支持的语言；如果匹配默认语言就停留，否则只在默认语言首页跳转。每个标签页只自动跳转一次，并使用 `location.replace`，避免历史记录回退陷阱和重复跳转。文章、页面和其他语言首页不重定向。语言切换链接带 `data-language`，点击后把选择写入按站点 base 区分的 localStorage key；已有选择优先于浏览器语言。
 
 ## 主题契约
 
