@@ -14,6 +14,7 @@
   }
   const lang = root.dataset.lang || ''
   const indexUrl = root.dataset.index || ''
+  const searchTimeout = 12_000
   let pagefind
   let pagefindPromise
   let timer
@@ -34,6 +35,16 @@
 
   function clearResults() {
     list.replaceChildren()
+  }
+
+  function withTimeout(promise, ms) {
+    let timeout
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timeout = setTimeout(() => reject(new Error(`Search timed out after ${ms}ms`)), ms)
+      }),
+    ]).finally(() => clearTimeout(timeout))
   }
 
   function renderResults(items) {
@@ -60,14 +71,17 @@
     }
     setStatus(labels.loading)
     try {
-      const search = await loadPagefind()
-      if (search.options) {
-        await search.options({ excerptLength: 30 })
-      }
-      const filters = lang ? { filters: { lang } } : undefined
-      const response = await search.search(query.trim(), filters)
-      const results = await Promise.all(
-        response.results.slice(0, 20).map((result) => result.data()),
+      const results = await withTimeout(
+        (async () => {
+          const search = await loadPagefind()
+          if (search.options) {
+            await search.options({ excerptLength: 30 })
+          }
+          const filters = lang ? { filters: { lang } } : undefined
+          const response = await search.search(query.trim(), filters)
+          return Promise.all(response.results.slice(0, 20).map((result) => result.data()))
+        })(),
+        searchTimeout,
       )
       renderResults(results)
       setStatus(results.length === 0 ? labels.empty : labels.results.replace('{n}', String(results.length)))

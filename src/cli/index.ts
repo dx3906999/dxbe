@@ -27,7 +27,7 @@ const COMMANDS: Record<string, (argv: string[]) => Promise<void>> = {
   new: runNew,
   clean: runClean,
   setup: runSetup,
-  index: runIndex,
+  index: () => runIndex(),
   check: runCheck,
   'check:links': runCheckLinks,
   'check:seo': runCheckSeo,

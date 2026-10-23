@@ -54,9 +54,9 @@ site.config.ts
 
 ## 搜索
 
-Pagefind 在构建后扫描 `dist`。只有带 `data-pagefind-body` 的文章和页面被索引；正文容器带 `data-pagefind-filter="lang:<lang>"`。代码块和公式通过 `--exclude-selectors` 排除。
+生产构建后由 `dxbe index` 扫描 `dist`；`dxbe dev` 在每次成功重建后扫描 `.dev-dist/<port>`，因此本地搜索也可用。只有带 `data-pagefind-body` 的文章和页面被索引；正文容器带 `data-pagefind-filter="lang:<lang>"`。代码块和公式通过 `--exclude-selectors` 排除。
 
-核心的 `src/assets/search.js` 懒加载 `pagefind/pagefind.js`，按当前语言传 filter，渲染结果、更新 `?q=` 并处理空/错误状态。主题只提供容器和样式。
+核心的 `src/assets/search.js` 懒加载 `pagefind/pagefind.js`，按当前语言传 filter，渲染结果、更新 `?q=` 并处理空/错误状态。加载或查询超过 12 秒会显示错误，不会一直停在“正在搜索”。主题只提供容器和样式。
 
 ## 数学
 

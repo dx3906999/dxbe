@@ -26,12 +26,12 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.5.0/dxbe-0.5.0.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.5.1/dxbe-0.5.1.tgz
 npx dxbe setup
 npx dxbe dev
 ```
 
-发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.5.0`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
+发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.5.1`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
 
 `setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。非交互使用：
 
@@ -75,7 +75,7 @@ package.json
 
 | 命令 | 作用 |
 | --- | --- |
-| `dxbe dev` | 本地开发，监听内容、主题和配置 |
+| `dxbe dev` | 本地开发，监听内容、主题和配置，并重建搜索索引 |
 | `dxbe build` | 生成 `dist/`，不建搜索索引 |
 | `dxbe check` | 构建、链接、SEO、主题一致性、Pagefind 索引 |
 | `dxbe index` | 只重建 Pagefind 索引 |
@@ -92,6 +92,8 @@ npx dxbe build
 npx dxbe index
 npx dxbe preview
 ```
+
+开发模式会为 `.dev-dist/<port>/` 自动重建 Pagefind 索引，本地搜索可用；生产构建仍然单独执行 `npx dxbe index`。
 
 ## 构建流程
 

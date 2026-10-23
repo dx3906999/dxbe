@@ -4,8 +4,15 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Logger } from '../shared/logger.ts'
 
-export async function runIndex(): Promise<void> {
+export interface RunIndexOptions {
+  siteDir?: string
+  quiet?: boolean
+}
+
+export async function runIndex(options: RunIndexOptions = {}): Promise<void> {
   const logger = new Logger()
+  const label = options.siteDir ?? 'dist'
+  const siteDir = path.resolve(label)
   const pagefindEntry = fileURLToPath(import.meta.resolve('pagefind'))
   const pagefindRoot = path.resolve(path.dirname(pagefindEntry), '..')
   const manifest = JSON.parse(await readFile(path.join(pagefindRoot, 'package.json'), 'utf8')) as {
@@ -19,7 +26,7 @@ export async function runIndex(): Promise<void> {
   const args = [
     path.resolve(pagefindRoot, relativeBin),
     '--site',
-    'dist',
+    siteDir,
     '--output-subdir',
     'pagefind',
     '--exclude-selectors',
@@ -27,12 +34,12 @@ export async function runIndex(): Promise<void> {
   ]
 
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(process.execPath, args, { stdio: 'inherit' })
+    const child = spawn(process.execPath, args, { stdio: options.quiet ? 'ignore' : 'inherit' })
     child.on('error', reject)
     child.on('close', (code) => {
       if (code === 0) resolve()
       else reject(new Error(`Pagefind exited with code ${code}`))
     })
   })
-  logger.info('indexed dist/ -> dist/pagefind')
+  if (!options.quiet) logger.info(`indexed ${label} -> ${path.join(label, 'pagefind')}`)
 }

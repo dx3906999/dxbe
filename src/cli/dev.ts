@@ -5,6 +5,7 @@ import { loadConfig } from '../core/config.ts'
 import { formatError } from '../shared/errors.ts'
 import { Logger } from '../shared/logger.ts'
 import { parseArgs } from './args.ts'
+import { runIndex } from './pagefind.ts'
 import { type StaticServer, startStaticServer } from './server.ts'
 
 interface BuildRun {
@@ -39,6 +40,14 @@ function runChildBuild(
   })
 }
 
+async function buildSearchIndex(outDir: string, logger: Logger): Promise<void> {
+  try {
+    await runIndex({ siteDir: outDir, quiet: true })
+  } catch (error) {
+    logger.warn(`search index failed: ${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
 export async function runDev(argv: string[] = process.argv.slice(2)): Promise<void> {
   const args = parseArgs(argv)
   const logger = new Logger(args.flags.has('--verbose') ? 'debug' : 'info')
@@ -62,6 +71,7 @@ export async function runDev(argv: string[] = process.argv.slice(2)): Promise<vo
     console.error(initial.output)
     process.exit(1)
   }
+  if (loaded.config.features.search) await buildSearchIndex(outDir, logger)
 
   const server: StaticServer = await startStaticServer({
     root: path.join(root, outDir),
@@ -85,6 +95,7 @@ export async function runDev(argv: string[] = process.argv.slice(2)): Promise<vo
     try {
       const result = await runChildBuild(cliEntry, root, loaded.config.site.base, theme, outDir)
       if (result.code === 0) {
+        if (loaded.config.features.search) await buildSearchIndex(outDir, logger)
         logger.info('rebuilt')
         server.broadcastReload()
       } else {
