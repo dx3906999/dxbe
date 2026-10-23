@@ -33,6 +33,7 @@ describe('site build', () => {
     expect(zh).not.toContain('href="/zh/"')
     expect(zh).toContain('data-language="en"')
     expect(zh).toContain('navigator.languages')
+    expect(en).toContain('<a href="/en/" aria-current="page">Home</a>')
   })
 
   it('renders a post with math, search metadata, and anchors', async () => {
@@ -44,6 +45,14 @@ describe('site build', () => {
     expect(html).toContain('class="katex"')
     expect(html).not.toContain('katex-error')
     expect(html).toContain('class="toc"')
+  })
+
+  it('keeps the language home out of the current state on inner pages', async () => {
+    const enPost = result.tasks.find((task) => task.lang === 'en' && task.kind === 'post')
+    expect(enPost).toBeDefined()
+    const html = await readFile(path.join(root, outDir, enPost?.outFile ?? ''), 'utf8')
+    expect(html).not.toContain('<a href="/en/" aria-current="page">')
+    expect(html).toContain('<a href="/en/" aria-current="false">Home</a>')
   })
 
   it('writes feeds, sitemap, robots, and 404', async () => {

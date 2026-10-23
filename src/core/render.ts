@@ -129,7 +129,9 @@ function buildNav(
     const compareCurrent = normalizePath(currentPath)
     const compareNav = normalizePath(localizedPath)
     const current =
-      compareNav === '/' ? compareCurrent === '/' : compareCurrent.startsWith(compareNav)
+      item.path === '/'
+        ? compareCurrent === compareNav
+        : compareCurrent === compareNav || compareCurrent.startsWith(`${compareNav}/`)
 
     items.push({
       key: item.key,
