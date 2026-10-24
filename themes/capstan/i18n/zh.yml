@@ -1,0 +1,72 @@
+nav:
+  posts: 文章
+  categories: 分类
+  publications: 发表
+  label: 主导航
+  home: 首页
+  archives: 归档
+  tags: 标签
+  about: 关于
+  search: 搜索
+page:
+  posts: 文章
+  categories: 分类
+  publications: 发表
+  categoryPosts: 共 {count} 篇
+  tags: 标签
+  archives: 归档
+  search: 搜索
+  notFound: 无信号
+  notFoundBody: 这个地址没有对应的页面。链接可能已经过期，或者文章换了位置。
+  pageOf: 第 {n} 页
+  tagPosts: 共 {count} 篇
+  postsUnit: 篇
+post:
+  toc: 索引
+  prev: 上一篇
+  next: 下一篇
+  minutes: 分钟
+  tags: 标签
+  empty: 还没有文章。
+  backHome: 返回首页
+  date: 记录
+  updated: 修订
+  read: 时长
+  lang: 语言
+paginator:
+  prev: 上一页
+  next: 下一页
+  page: 第 {n} 页
+  label: 分页
+toc:
+  title: 索引
+theme:
+  toggle: 切换明暗
+  light: 昼
+  dark: 夜
+footer:
+  license: 许可证
+  source: 查看源码
+  rss: RSS
+  built: 由 dxbe 生成
+language:
+  switch: 语言
+search:
+  placeholder: 输入检索词
+  loading: 正在检索...
+  empty: 没有找到结果。
+  error: 搜索索引尚未生成，或加载失败。
+  results: 找到 {n} 条结果
+  noscript: 搜索需要 JavaScript。
+a11y:
+  skip: 跳到正文
+  menu: 打开导航
+tag:
+  empty: 还没有标签。
+panel:
+  monitor: 监视器
+  recent: 最近记录
+  tags: 标签
+  related: 本文标签
+  level: 进度
+  route: 前后文章

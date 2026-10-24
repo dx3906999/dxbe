@@ -2,7 +2,7 @@
 
 主题是独立目录，核心只负责内容、路由和渲染数据，主题负责把数据变成 HTML。
 
-`folio`、`orbital`、`scholar` 随 `dxbe` 包发布。博客仓库不需要复制它们；把自定义主题放在博客仓库的 `themes/<name>/`，同名主题会覆盖内置主题。
+`folio`、`orbital`、`scholar`、`apogee`、`capstan` 随 `dxbe` 包发布。博客仓库不需要复制它们；把自定义主题放在博客仓库的 `themes/<name>/`，同名主题会覆盖内置主题。
 
 ## 目录
 
@@ -79,15 +79,17 @@ type LayoutFn = (ctx: ThemeContext) => string | SafeHtml
 常用字段：
 
 - `ctx.site`：标题、描述、作者、许可证、语言列表、base
-- `ctx.page`：`{ kind, title }`，kind 是 `index | post | page | archive | tag | tags | search | notFound`
+- `ctx.page`：`{ kind, title }`，kind 是 `index | home | post | page | publications | archive | tag | tags | category | categories | search | notFound`
 - `ctx.post` / `ctx.pageItem`：当前文章或页面
 - `ctx.posts`：列表页的文章
-- `ctx.tag` / `ctx.tags` / `ctx.archives` / `ctx.pagination`
+- `ctx.tag` / `ctx.tags` / `ctx.category` / `ctx.categories` / `ctx.archives` / `ctx.pagination`
+- `ctx.pageItem.publications`：publications 页的结构化条目（`title`、`authors`、`venue`、`year`、`type`、`note`、`links`）
+- `ctx.routes`：当前语言各栏目的地址（已含 base）：`home`、`posts`、`archives`、`tags`、`categories`，以及开启时的 `search`、`publications`。`routes.posts === routes.home` 说明首页就是文章列表
 - `ctx.toc`：标题数组；`ctx.tocHtml`：核心渲染好的目录 HTML
 - `ctx.seo`：标题、描述、canonical、hreflang、OG 类型、JSON-LD
 - `ctx.i18n`：`lang`、`label`、`t()`、当前页面的语言链接
 - `ctx.assets`：主题 CSS/JS、KaTeX CSS、搜索脚本和索引地址
-- `ctx.helpers`：URL、日期、资源、标签链接等
+- `ctx.helpers`：URL、日期、资源、标签和分类链接（`tagUrl`、`categoryUrl`、`categoryUrlByName`）等
 - `ctx.theme`：校验后的主题配置
 
 ## 模板
@@ -128,8 +130,14 @@ ${languageBootstrap(ctx)}
 
 - `post → page → 内置 fallback`
 - `page → post → 内置 fallback`
+- `home → page → index`（`home` 是 `profile` 首页，`ctx.pageItem` 是简介页，`ctx.posts` 是最新文章）
+- `publications → page → post → index`
 - `tag → archive → index`
 - `tags → archive → index`
+- `category → tag → archive → index`
+- `categories → tags → archive → index`
+
+分类任务同时填充 `ctx.tag` / `ctx.tags`，没有分类布局的主题回退到标签布局时也有数据。
 - `search → index`
 - `notFound → page → index`
 
@@ -150,7 +158,9 @@ ${languageBootstrap(ctx)}
 
 ```
 nav.label, nav.home, nav.archives, nav.tags, nav.about, nav.search
+nav.posts, nav.categories, nav.publications
 page.tags, page.archives, page.search, page.notFound
+page.posts, page.categories, page.publications
 paginator.page
 toc.title
 ```
