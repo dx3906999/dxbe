@@ -40,11 +40,18 @@ export default defineConfig({
     name: 'folio',
     config: {},
   },
+  home: {
+    // 'profile' renders content/<lang>/pages/home.md at / and moves the post list to /posts/
+    layout: 'profile',
+    page: 'home',
+  },
   nav: [
     { key: 'home', path: '/' },
-    { key: 'archives', path: '/archives/' },
+    { key: 'publications', path: '/publications/' },
+    { key: 'posts', path: '/posts/' },
+    { key: 'categories', path: '/categories/' },
     { key: 'tags', path: '/tags/' },
-    { key: 'about', path: '/about/' },
+    { key: 'archives', path: '/archives/' },
   ],
   pagination: {
     perPage: 10,
@@ -53,5 +60,6 @@ export default defineConfig({
     search: true,
     math: true,
     autoLanguage: true,
+    publications: true,
   },
 })

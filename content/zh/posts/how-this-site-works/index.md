@@ -2,6 +2,7 @@
 title: 这个站点是怎么搭起来的
 date: 2026-10-22T10:00:00+08:00
 tags: [工程, 静态站点]
+categories: [工程实践]
 slug: how-this-site-works
 translationKey: how-this-site-works
 summary: 记录这个博客的构建方式：Node、Markdown、主题契约和 GitHub Pages。

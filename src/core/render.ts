@@ -6,14 +6,18 @@ import { html, raw, type SafeHtml, unwrap } from '../shared/html.ts'
 import type { Logger } from '../shared/logger.ts'
 import {
   archivePath,
+  categoriesPath,
   homePath,
   absoluteUrl as makeAbsoluteUrl,
+  pagePath,
+  postsPath,
   searchPath,
   tagsPath,
   withBase,
 } from '../shared/url.ts'
 import type {
   NavItemView,
+  RouteView,
   SeoView,
   SiteView,
   ThemeAssets,
@@ -105,6 +109,9 @@ function buildNav(
       continue
     }
     if (item.path === '/search/' && !config.features.search) continue
+    const profile = config.home.layout === 'profile'
+    // without a profile home the post list already is the home
+    if (item.path === '/posts/' && !profile) continue
 
     let localizedPath: string
     if (item.external) {
@@ -113,13 +120,18 @@ function buildNav(
       localizedPath = homePath(lang, defaultLang)
     } else if (item.path === '/archives/') {
       localizedPath = archivePath(lang, defaultLang)
+    } else if (item.path === '/posts/') {
+      localizedPath = postsPath(lang, defaultLang)
     } else if (item.path === '/tags/') {
       localizedPath = tagsPath(lang, defaultLang)
+    } else if (item.path === '/categories/') {
+      localizedPath = categoriesPath(lang, defaultLang)
     } else if (item.path === '/search/') {
       localizedPath = searchPath(lang, defaultLang)
     } else {
       const slug = item.path.replace(/^\/+|\/+$/g, '')
       if (!pages.some((page) => page.slug === slug)) continue
+      if (profile && slug === config.home.page) continue
       localizedPath = `/${slug}/`
       localizedPath = withBase('', localizedPath)
       localizedPath = `${lang === defaultLang ? '' : `/${lang}`}${localizedPath}`
@@ -143,6 +155,26 @@ function buildNav(
   }
 
   return items
+}
+
+function buildRoutes(loaded: LoadedConfig, content: ContentSet, lang: string): RouteView {
+  const config = loaded.config
+  const defaultLang = config.locales.default
+  const at = (pathname: string) => withBase(loaded.base, pathname)
+  const hasPublications = (content.pagesByLang[lang] ?? []).some(
+    (page) => page.slug === 'publications',
+  )
+  return {
+    home: at(homePath(lang, defaultLang)),
+    posts: at(
+      config.home.layout === 'profile' ? postsPath(lang, defaultLang) : homePath(lang, defaultLang),
+    ),
+    archives: at(archivePath(lang, defaultLang)),
+    tags: at(tagsPath(lang, defaultLang)),
+    categories: at(categoriesPath(lang, defaultLang)),
+    search: config.features.search ? at(searchPath(lang, defaultLang)) : undefined,
+    publications: hasPublications ? at(pagePath(lang, defaultLang, 'publications')) : undefined,
+  }
 }
 
 function renderToc(task: RenderTask, t: Translator): SafeHtml {
@@ -189,7 +221,17 @@ function buildJsonLd(
       url: canonical,
       keywords: task.post.tags.join(', ') || undefined,
     }
-  } else if (task.kind === 'page' && task.pageItem) {
+  } else if (task.kind === 'home' && task.pageItem) {
+    data = {
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      name: task.pageItem.title,
+      description,
+      inLanguage: lang,
+      url: canonical,
+      mainEntity: author,
+    }
+  } else if ((task.kind === 'page' || task.kind === 'publications') && task.pageItem) {
     data = {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
@@ -236,11 +278,14 @@ function buildSeo(
   const siteTitle = locale.title
 
   let documentTitle: string
-  if (task.kind === 'index') {
+  if (task.kind === 'home') {
+    documentTitle = siteTitle
+  } else if (task.kind === 'index') {
+    const listTitle = config.home.layout === 'profile' ? `${pageTitle} · ${siteTitle}` : siteTitle
     documentTitle =
       task.pagination && task.pagination.current > 1
-        ? `${siteTitle} · ${t('paginator.page', { n: task.pagination.current })}`
-        : siteTitle
+        ? `${listTitle} · ${t('paginator.page', { n: task.pagination.current })}`
+        : listTitle
   } else {
     documentTitle = `${pageTitle} · ${siteTitle}`
   }
@@ -354,6 +399,11 @@ function buildContext(
       const tag = (content.tagsByLang[lang] ?? []).find((entry) => entry.name === name)
       return tag ? withBase(loaded.base, tag.url) : '#'
     },
+    categoryUrl: (category: { url: string }) => withBase(loaded.base, category.url),
+    categoryUrlByName: (name: string) => {
+      const category = (content.categoriesByLang[lang] ?? []).find((entry) => entry.name === name)
+      return category ? withBase(loaded.base, category.url) : '#'
+    },
   }
 
   return {
@@ -367,6 +417,7 @@ function buildContext(
       alternates: languageAlternates,
     },
     nav,
+    routes: buildRoutes(loaded, content, lang),
     seo,
     assets,
     theme: deps.theme.config,
@@ -377,6 +428,8 @@ function buildContext(
     pageItem: task.pageItem,
     tag: task.tag,
     tags: task.tags,
+    category: task.category,
+    categories: task.categories,
     archives: task.archives,
     pagination: task.pagination,
     helpers,

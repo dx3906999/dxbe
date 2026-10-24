@@ -2,11 +2,15 @@ import type { SafeHtml } from '../shared/html.ts'
 
 export type PageKind =
   | 'index'
+  | 'home'
   | 'post'
   | 'page'
+  | 'publications'
   | 'archive'
   | 'tag'
   | 'tags'
+  | 'category'
+  | 'categories'
   | 'search'
   | 'notFound'
 
@@ -37,6 +41,7 @@ export interface Post {
   timestamp: number
   updated?: string
   tags: string[]
+  categories: string[]
   summary: string
   draft: boolean
   url: string
@@ -67,6 +72,23 @@ export interface PageItem {
   sourceFile: string
   sourceDir: string
   assetFiles: string[]
+  /** Structured entries from the publications page frontmatter. */
+  publications?: Publication[]
+}
+
+export interface PublicationLink {
+  label: string
+  url: string
+}
+
+export interface Publication {
+  title: string
+  authors: string[]
+  venue?: string
+  year?: string
+  type?: string
+  note?: string
+  links: PublicationLink[]
 }
 
 export interface TagView {
@@ -75,6 +97,9 @@ export interface TagView {
   url: string
   count: number
 }
+
+/** Categories share the tag shape: name, slug, url, count. */
+export type CategoryView = TagView
 
 export interface ArchiveGroup {
   year: number
@@ -98,6 +123,7 @@ export interface ContentSet {
   postsByLang: Record<string, Post[]>
   pagesByLang: Record<string, PageItem[]>
   tagsByLang: Record<string, TagView[]>
+  categoriesByLang: Record<string, CategoryView[]>
   archivesByLang: Record<string, ArchiveGroup[]>
   warnings: string[]
 }

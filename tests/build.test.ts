@@ -55,6 +55,39 @@ describe('site build', () => {
     expect(html).toContain('<a href="/en/" aria-current="false">Home</a>')
   })
 
+  it('renders the profile home and moves the post list to /posts/', async () => {
+    const home = result.tasks.find((task) => task.lang === 'zh' && task.urlPath === '/')
+    expect(home?.kind).toBe('home')
+    expect(home?.pageItem?.slug).toBe('home')
+    // the profile page is the home, not a page of its own
+    expect(result.tasks.some((task) => task.urlPath === '/home/')).toBe(false)
+    const list = result.tasks.find((task) => task.lang === 'en' && task.urlPath === '/en/posts/')
+    expect(list?.kind).toBe('index')
+    expect(list?.posts?.length).toBeGreaterThan(0)
+    const html = await readFile(path.join(root, outDir, 'posts', 'index.html'), 'utf8')
+    expect(html).toContain('<link rel="canonical" href="http://localhost:4000/posts/">')
+  })
+
+  it('builds category pages from post frontmatter', async () => {
+    const index = result.tasks.find((task) => task.lang === 'zh' && task.kind === 'categories')
+    expect(index?.urlPath).toBe('/categories/')
+    expect(index?.categories?.length).toBeGreaterThan(0)
+    const category = result.tasks.find((task) => task.lang === 'en' && task.kind === 'category')
+    expect(category?.urlPath).toMatch(/^\/en\/categories\/[^/]+\/$/)
+    expect(
+      category?.posts?.every((post) => post.categories.includes(category.category?.name ?? '')),
+    ).toBe(true)
+    await expect(
+      access(path.join(root, outDir, 'categories', 'index.html')),
+    ).resolves.toBeUndefined()
+  })
+
+  it('renders the publications page when the feature is on', async () => {
+    const page = result.tasks.find((task) => task.lang === 'zh' && task.kind === 'publications')
+    expect(page?.urlPath).toBe('/publications/')
+    expect(page?.pageItem?.publications?.[0]?.authors.length).toBeGreaterThan(0)
+  })
+
   it('writes feeds, sitemap, robots, and 404', async () => {
     for (const file of ['atom.xml', 'en/atom.xml', 'sitemap.xml', 'robots.txt', '404.html']) {
       await expect(access(path.join(root, outDir, file))).resolves.toBeUndefined()

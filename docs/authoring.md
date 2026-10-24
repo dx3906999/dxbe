@@ -27,6 +27,7 @@ title: 标题
 date: 2026-10-22T10:00:00+08:00
 updated: 2026-10-23T09:00:00+08:00
 tags: [工程, 静态站点]
+categories: [工程实践]
 slug: how-this-site-works
 translationKey: how-this-site-works
 summary: 可选的摘要
@@ -40,12 +41,37 @@ draft: false
 | `date` | 是 | ISO 8601，必须带时区偏移 |
 | `updated` | 否 | 更新时间，格式同上 |
 | `tags` | 否 | 字符串数组 |
+| `categories` | 否 | 字符串数组，平铺分类，生成 `/categories/<slug>/` |
 | `slug` | 否 | 默认取目录名；小写 ASCII、数字、连字符 |
 | `translationKey` | 否 | 译文关联键，默认等于 slug |
 | `summary` | 否 | 摘要；缺省从正文第一段提取 |
 | `draft` | 否 | `true` 时只在开发模式出现 |
 
 页面（`pages/`）的 frontmatter 用 `description` 代替 `summary`，`date` 可选。
+
+### 首页简介和发表页
+
+`home.layout: 'profile'` 时，`pages/home.md`（或 `home.page` 指定的页面）作为语言首页渲染，适合放简历或自我介绍。
+
+`features.publications: true` 时，`pages/publications.md` 发布在 `/publications/`。条目写在 frontmatter，正文显示在列表上方：
+
+```yaml
+---
+title: 发表
+publications:
+  - title: 论文标题
+    authors: [作者 A, 作者 B]   # 也可以写成单个字符串
+    venue: 会议或期刊
+    year: 2026
+    type: 会议论文            # 可选
+    note: 可选备注
+    links:
+      - label: PDF
+        url: https://example.com/paper.pdf
+---
+```
+
+作者列表里与 `identity.author.name` 同名的条目由主题加粗。
 
 ## 规则
 

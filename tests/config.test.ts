@@ -33,6 +33,13 @@ const baseConfig = (site: string): string => `export default {
 `
 
 describe('config loading', () => {
+  it('keeps the post list as the home and publications off by default', async () => {
+    const root = await fixture(baseConfig(`{ url: 'http://localhost:4000' }`))
+    const loaded = await loadConfig({ root, production: false })
+    expect(loaded.config.home).toEqual({ layout: 'posts', page: 'home' })
+    expect(loaded.config.features.publications).toBe(false)
+  })
+
   it('normalizes a custom domain and uses it as the origin', async () => {
     const previousUrl = process.env.SITE_URL
     const previousBase = process.env.SITE_BASE

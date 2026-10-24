@@ -45,6 +45,29 @@ export function tagPath(lang: string, defaultLang: string, tagSlug: string): str
   return joinLangPath(lang, defaultLang, `/tags/${encodeURIComponent(tagSlug)}/`)
 }
 
+export function postsPaginationPath(lang: string, defaultLang: string, page: number): string {
+  if (page <= 1) return postsPath(lang, defaultLang)
+  return joinLangPath(lang, defaultLang, `/posts/page/${page}/`)
+}
+
+export function categoryPath(lang: string, defaultLang: string, slug: string): string {
+  return joinLangPath(lang, defaultLang, `/categories/${encodeURIComponent(slug)}/`)
+}
+
+export function categoriesPath(lang: string, defaultLang: string): string {
+  return joinLangPath(lang, defaultLang, '/categories/')
+}
+
+export function categoryPaginationPath(
+  lang: string,
+  defaultLang: string,
+  slug: string,
+  page: number,
+): string {
+  if (page <= 1) return categoryPath(lang, defaultLang, slug)
+  return joinLangPath(lang, defaultLang, `/categories/${encodeURIComponent(slug)}/page/${page}/`)
+}
+
 export function tagsPath(lang: string, defaultLang: string): string {
   return joinLangPath(lang, defaultLang, '/tags/')
 }

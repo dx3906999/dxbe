@@ -2,6 +2,7 @@
 title: Typography notes for three themes
 date: 2026-10-21T09:30:00+08:00
 tags: [Typography, Themes]
+categories: [Design]
 slug: typography-notes
 translationKey: typography-notes
 summary: folio, orbital, and scholar are not recolors. Their typographic systems decide how they read.

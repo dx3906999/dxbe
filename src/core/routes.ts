@@ -1,8 +1,11 @@
 import { isoDate } from '../shared/date.ts'
 import {
   archivePath,
+  categoriesPath,
+  categoryPaginationPath,
   homePath,
   paginationPath,
+  postsPaginationPath,
   searchPath,
   stripBase,
   tagPaginationPath,
@@ -12,6 +15,7 @@ import type { LoadedConfig } from './config.ts'
 import type {
   Alternate,
   ArchiveGroup,
+  CategoryView,
   ContentSet,
   PageItem,
   PageKind,
@@ -36,6 +40,8 @@ export interface RenderTask {
   pageItem?: PageItem
   tag?: TagView
   tags?: TagView[]
+  category?: CategoryView
+  categories?: CategoryView[]
   archives?: ArchiveGroup[]
   pagination?: Pagination
   toc?: TocEntry[]
@@ -88,20 +94,21 @@ function buildPagination(
   }
 }
 
-function tagAlternates(
-  tagName: string,
+/** Same-named tag or category in each language, else that language's index of them. */
+function taxonomyAlternates(
+  name: string,
+  byLang: Record<string, TagView[]>,
+  indexPath: (lang: string) => string,
   loaded: LoadedConfig,
-  content: ContentSet,
   languages: string[],
 ): Alternate[] {
-  const defaultLang = loaded.config.locales.default
   return languages.map((lang) => {
-    const tag = content.tagsByLang[lang]?.find((entry) => entry.name === tagName)
+    const item = byLang[lang]?.find((entry) => entry.name === name)
     return {
       lang,
       label: loaded.config.locales.entries[lang]?.label ?? lang,
-      url: tag ? tag.url : tagsPath(lang, defaultLang),
-      title: tag?.name ?? loaded.config.locales.entries[lang]?.title ?? lang,
+      url: item ? item.url : indexPath(lang),
+      title: item?.name ?? loaded.config.locales.entries[lang]?.title ?? lang,
     }
   })
 }
@@ -140,7 +147,10 @@ export function buildTasks(loaded: LoadedConfig, content: ContentSet): RenderTas
     const posts = content.postsByLang[lang] ?? []
     const pages = content.pagesByLang[lang] ?? []
     const tags = content.tagsByLang[lang] ?? []
+    const categories = content.categoriesByLang[lang] ?? []
     const archives = content.archivesByLang[lang] ?? []
+    const profile = config.home.layout === 'profile'
+    const homePage = profile ? pages.find((page) => page.slug === config.home.page) : undefined
 
     const homeAlternates = sectionAlternates(
       languages,
@@ -148,20 +158,48 @@ export function buildTasks(loaded: LoadedConfig, content: ContentSet): RenderTas
       (code) => homePath(code, defaultLang),
       (code) => config.locales.entries[code]?.title ?? code,
     )
-    const homeTotal = Math.max(1, Math.ceil(posts.length / perPage))
-    for (let page = 1; page <= homeTotal; page += 1) {
+    if (homePage) {
+      const urlPath = homePath(lang, defaultLang)
+      tasks.push({
+        kind: 'home',
+        lang,
+        urlPath,
+        outFile: outFileForUrl(urlPath, loaded.base),
+        title: homePage.title,
+        description: homePage.summary || locale.description,
+        pageItem: homePage,
+        toc: homePage.toc,
+        // the newest posts, for themes that show them next to the introduction
+        posts: posts.slice(0, perPage),
+        alternates: homeAlternates,
+        lastmod: posts[0] ? isoDate(new Date(posts[0].timestamp), timezone) : undefined,
+      })
+    }
+
+    const listPath = (code: string, n: number) =>
+      profile ? postsPaginationPath(code, defaultLang, n) : paginationPath(code, defaultLang, n)
+    const listAlternates = profile
+      ? sectionAlternates(
+          languages,
+          loaded,
+          (code) => listPath(code, 1),
+          (code) => config.locales.entries[code]?.title ?? code,
+        )
+      : homeAlternates
+    const listTotal = Math.max(1, Math.ceil(posts.length / perPage))
+    for (let page = 1; page <= listTotal; page += 1) {
       const pagePosts = posts.slice((page - 1) * perPage, page * perPage)
-      const urlPath = paginationPath(lang, defaultLang, page)
+      const urlPath = listPath(lang, page)
       tasks.push({
         kind: 'index',
         lang,
         urlPath,
         outFile: outFileForUrl(urlPath, loaded.base),
-        title: locale.title,
+        ...(profile ? { titleKey: 'page.posts' } : { title: locale.title }),
         description: locale.description,
         posts: pagePosts,
-        pagination: buildPagination(page, homeTotal, (n) => paginationPath(lang, defaultLang, n)),
-        alternates: page === 1 ? homeAlternates : [],
+        pagination: buildPagination(page, listTotal, (n) => listPath(lang, n)),
+        alternates: page === 1 ? listAlternates : [],
         lastmod: pagePosts[0] ? isoDate(new Date(pagePosts[0].timestamp), timezone) : undefined,
         noindex: page > 1,
       })
@@ -201,7 +239,13 @@ export function buildTasks(loaded: LoadedConfig, content: ContentSet): RenderTas
 
     for (const tag of tags) {
       const tagPosts = posts.filter((post) => post.tags.includes(tag.name))
-      const alternates = tagAlternates(tag.name, loaded, content, languages)
+      const alternates = taxonomyAlternates(
+        tag.name,
+        content.tagsByLang,
+        (code) => tagsPath(code, defaultLang),
+        loaded,
+        languages,
+      )
       const total = Math.max(1, Math.ceil(tagPosts.length / perPage))
       for (let page = 1; page <= total; page += 1) {
         const urlPath = tagPaginationPath(lang, defaultLang, tag.slug, page)
@@ -217,6 +261,57 @@ export function buildTasks(loaded: LoadedConfig, content: ContentSet): RenderTas
           posts: pagePosts,
           pagination: buildPagination(page, total, (n) =>
             tagPaginationPath(lang, defaultLang, tag.slug, n),
+          ),
+          alternates: page === 1 ? alternates : [],
+          lastmod: pagePosts[0] ? isoDate(new Date(pagePosts[0].timestamp), timezone) : undefined,
+          noindex: page > 1,
+        })
+      }
+    }
+
+    const categoriesIndexUrl = categoriesPath(lang, defaultLang)
+    tasks.push({
+      kind: 'categories',
+      lang,
+      urlPath: categoriesIndexUrl,
+      outFile: outFileForUrl(categoriesIndexUrl, loaded.base),
+      titleKey: 'page.categories',
+      description: locale.description,
+      categories,
+      tags: categories,
+      alternates: sectionAlternates(
+        languages,
+        loaded,
+        (code) => categoriesPath(code, defaultLang),
+        (code) => config.locales.entries[code]?.title ?? code,
+      ),
+    })
+
+    for (const category of categories) {
+      const categoryPosts = posts.filter((post) => post.categories.includes(category.name))
+      const alternates = taxonomyAlternates(
+        category.name,
+        content.categoriesByLang,
+        (code) => categoriesPath(code, defaultLang),
+        loaded,
+        languages,
+      )
+      const total = Math.max(1, Math.ceil(categoryPosts.length / perPage))
+      for (let page = 1; page <= total; page += 1) {
+        const urlPath = categoryPaginationPath(lang, defaultLang, category.slug, page)
+        const pagePosts = categoryPosts.slice((page - 1) * perPage, page * perPage)
+        tasks.push({
+          kind: 'category',
+          lang,
+          urlPath,
+          outFile: outFileForUrl(urlPath, loaded.base),
+          title: category.name,
+          description: locale.description,
+          category,
+          tag: category,
+          posts: pagePosts,
+          pagination: buildPagination(page, total, (n) =>
+            categoryPaginationPath(lang, defaultLang, category.slug, n),
           ),
           alternates: page === 1 ? alternates : [],
           lastmod: pagePosts[0] ? isoDate(new Date(pagePosts[0].timestamp), timezone) : undefined,
@@ -274,8 +369,10 @@ export function buildTasks(loaded: LoadedConfig, content: ContentSet): RenderTas
     }
 
     for (const page of pages) {
+      // the profile page is published as the language home, not at its own slug
+      if (page === homePage) continue
       tasks.push({
-        kind: 'page',
+        kind: page.slug === 'publications' ? 'publications' : 'page',
         lang,
         urlPath: page.url,
         outFile: outFileForUrl(page.url, loaded.base),

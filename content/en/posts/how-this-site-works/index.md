@@ -2,6 +2,7 @@
 title: How this site is built
 date: 2026-10-22T10:00:00+08:00
 tags: [Engineering, Static Sites]
+categories: [Engineering]
 slug: how-this-site-works
 translationKey: how-this-site-works
 summary: "The build path behind this blog: Node, Markdown, a theme contract, and GitHub Pages."

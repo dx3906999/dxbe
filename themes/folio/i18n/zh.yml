@@ -1,4 +1,7 @@
 nav:
+  posts: 文章
+  categories: 分类
+  publications: 发表
   label: 主导航
   home: 首页
   archives: 归档
@@ -6,6 +9,10 @@ nav:
   about: 关于
   search: 搜索
 page:
+  posts: 文章
+  categories: 分类
+  publications: 发表
+  categoryPosts: 共 {count} 篇
   tags: 标签
   archives: 归档
   search: 搜索
