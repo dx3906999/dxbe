@@ -19,6 +19,32 @@ content/
 
 `index.md` 是文章正文，同目录的图片会被复制到文章输出目录。Markdown 里直接写 `![alt](./cover.jpg)` 即可。
 
+页面也可以写成目录形式（`pages/about/index.md`），同样会复制同目录文件。
+
+## PDF
+
+PDF 和图片一样放在文章目录里：
+
+```
+content/zh/posts/my-paper/
+  index.md
+  paper.pdf
+```
+
+单独一行用图片语法引用，就会嵌入阅读器，下方附标题链接：
+
+```markdown
+![论文全文](paper.pdf)
+![第 3 页的图](paper.pdf#page=3 "图 2：实验装置")
+```
+
+- 标题取引号里的 title，没有就用 alt，再没有就用文件名。
+- `#page=3` 这类片段会原样传给浏览器的 PDF 阅读器。
+- 多数手机浏览器不能内嵌 PDF，会显示链接；标题链接在任何浏览器里都能打开或下载文件。打印时嵌入框隐藏。
+- 写在句子中间（`见 ![论文](paper.pdf)。`）时只生成普通链接，不嵌入。
+- 放在 `public/` 里的 PDF 用站点路径引用（`![简历](/files/cv.pdf)`），项目页部署时会自动加 `base`。
+- `dxbe check:links` 会检查嵌入的 PDF 是否存在。GitHub Pages 单个文件上限 100 MB，大文件更适合放 Release 附件再写外链。
+
 ## Frontmatter
 
 ```yaml
@@ -72,6 +98,8 @@ publications:
 ```
 
 作者列表里与 `identity.author.name` 同名的条目由主题加粗。
+
+链接可以指向站内 PDF：把页面写成 `pages/publications/index.md`，PDF 放在同目录，`url: paper.pdf`；或放进 `public/papers/`，`url: /papers/paper.pdf`（会自动加 `base`）。
 
 ## 规则
 

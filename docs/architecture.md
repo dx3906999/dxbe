@@ -16,7 +16,7 @@ site.config.ts
 
 ## 包与博客实例
 
-`dxbe` 是可安装的 npm 包。构建时用 tsup 把 CLI、主题 API、配置 API 和三套内置主题编译到 `dist/`；主题的 `assets/`、`i18n/` 和 `search.js` 复制到对应位置。博客仓库只安装这个包，放 `content/`、`site.config.ts`、`public/` 和部署工作流。
+`dxbe` 是可安装的 npm 包。构建时用 tsup 把 CLI、主题 API、配置 API 和五套内置主题编译到 `dist/`；主题的 `assets/`、`i18n/` 和 `search.js` 复制到对应位置。博客仓库只安装这个包，放 `content/`、`site.config.ts`、`public/` 和部署工作流。
 
 内置主题从包的 `dist/themes/` 解析；博客仓库的 `themes/<name>/` 优先，可用于覆盖或新增主题。博客仓库不需要 `src/`、`themes/`、`scripts/` 或测试。
 

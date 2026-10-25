@@ -49,7 +49,7 @@ export function renderAtom(loaded: LoadedConfig, lang: string, posts: Post[]): s
       <published>${published}</published>
       <updated>${modified}</updated>
       <summary type="text">${escapeXml(post.summary)}</summary>
-      <content type="html">${escapeXml(post.html.value)}</content>${categories}
+      <content type="html" xml:base="${escapeXml(url)}">${escapeXml(post.html.value)}</content>${categories}
     </entry>`
     })
     .join('\n')

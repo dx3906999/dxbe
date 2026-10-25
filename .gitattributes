@@ -5,3 +5,13 @@
 *.webp binary
 *.avif binary
 *.woff2 binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.ttf binary
+*.otf binary
+*.mp4 binary
+*.webm binary
+*.mp3 binary
+*.tgz binary

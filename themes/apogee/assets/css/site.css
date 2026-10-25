@@ -2641,3 +2641,49 @@ a.ap-route__btn:active {
     background: #fff;
   }
 }
+
+/* embedded PDF: ![label](file.pdf) on its own line, framed like the prose images */
+
+.ap-prose .pdf-embed {
+  margin: 28px 0;
+}
+
+.pdf-embed__frame {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1.3;
+  max-height: 85vh;
+  border: 1px solid var(--edge);
+  background: var(--panel);
+}
+
+.pdf-embed__fallback {
+  display: block;
+  padding: 16px;
+  font: 600 12px/1.5 var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+.pdf-embed__caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--mute);
+  font: 600 11px/1.4 var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.pdf-embed__type {
+  padding: 3px 6px;
+  border: 1px solid var(--rule);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+
+@media print {
+  .pdf-embed__frame {
+    display: none;
+  }
+}

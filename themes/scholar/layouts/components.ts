@@ -1,4 +1,4 @@
-import { html, type Post, type ThemeContext } from '../../../src/theme/api.ts'
+import { html, type Post, type TagView, type ThemeContext } from '../../../src/theme/api.ts'
 import { getScholarConfig } from '../config.ts'
 
 export function tagLinks(ctx: ThemeContext, tags: string[]) {
@@ -86,13 +86,17 @@ export function prevNext(ctx: ThemeContext) {
   </nav>`
 }
 
-export function tagCloud(ctx: ThemeContext) {
-  const tags = ctx.tags ?? []
+/** Tags by default; categories pass their own list and URL helper. */
+export function tagCloud(
+  ctx: ThemeContext,
+  tags: TagView[] = ctx.tags ?? [],
+  url: (tag: TagView) => string = ctx.helpers.tagUrl,
+) {
   if (tags.length === 0) return html`<p class="empty">${ctx.i18n.t('tag.empty')}</p>`
   return html`<ul class="scholar-index-terms">
     ${tags.map(
       (tag) => html`<li>
-        <a href="${ctx.helpers.tagUrl(tag)}">${tag.name}</a>
+        <a href="${url(tag)}">${tag.name}</a>
         <span>${tag.count}</span>
       </li>`,
     )}
@@ -111,13 +115,13 @@ export function archiveList(ctx: ThemeContext) {
   </div>`
 }
 
-export function pageHeader(ctx: ThemeContext, extra?: { count?: number }) {
+export function pageHeader(ctx: ThemeContext, extra?: { count?: number; countKey?: string }) {
   return html`<header class="scholar-page-header">
     <p class="scholar-kicker">${ctx.page.kind.toUpperCase()}</p>
     <h1>${ctx.page.title}</h1>
     ${
       extra?.count !== undefined
-        ? html`<p class="scholar-count">${ctx.i18n.t('page.tagPosts', { count: extra.count })}</p>`
+        ? html`<p class="scholar-count">${ctx.i18n.t(extra.countKey ?? 'page.tagPosts', { count: extra.count })}</p>`
         : ''
     }
   </header>`

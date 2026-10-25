@@ -341,8 +341,15 @@ const RESERVED_PAGE_SLUGS = new Set([
   '404',
 ])
 
+function withSiteBase(url: string, base: string): string {
+  if (!base || !url.startsWith('/') || url.startsWith('//')) return url
+  if (url === base || url.startsWith(`${base}/`)) return url
+  return `${base}${url}`
+}
+
 function toPublications(
   entries: z.output<typeof publicationSchema>[] | undefined,
+  base: string,
 ): Publication[] | undefined {
   if (!entries) return undefined
   return entries.map((entry) => ({
@@ -352,7 +359,8 @@ function toPublications(
     year: entry.year === undefined ? undefined : String(entry.year),
     type: entry.type,
     note: entry.note,
-    links: entry.links,
+    // themes print these as-is, so site-root links (a PDF in public/) need the base here
+    links: entry.links.map((link) => ({ ...link, url: withSiteBase(link.url, base) })),
   }))
 }
 
@@ -407,7 +415,7 @@ async function buildPage(
     slug,
     translationKey,
     title: frontmatter.title,
-    publications: toPublications(frontmatter.publications),
+    publications: toPublications(frontmatter.publications, loaded.base),
     summary: frontmatter.description?.trim() || frontmatter.summary?.trim() || rendered.excerpt,
     draft: frontmatter.draft,
     url: pagePath(lang, loaded.config.locales.default, slug),
