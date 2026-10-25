@@ -1,6 +1,7 @@
 import type {
   Alternate,
   ArchiveGroup,
+  CategoryView,
   PageItem,
   PageKind,
   Pagination,
@@ -13,10 +14,13 @@ import { html, jsonForScript, raw, type SafeHtml } from '../shared/html.ts'
 export type {
   Alternate,
   ArchiveGroup,
+  CategoryView,
   PageItem,
   PageKind,
   Pagination,
   Post,
+  Publication,
+  PublicationLink,
   TagView,
   TocEntry,
 } from '../core/types.ts'
@@ -90,6 +94,23 @@ export interface ThemeHelpers {
   pageUrl: (page: { url: string }) => string
   tagUrl: (tag: TagView) => string
   tagUrlByName: (name: string) => string
+  categoryUrl: (category: CategoryView) => string
+  categoryUrlByName: (name: string) => string
+}
+
+/**
+ * Section URLs for the current language, base included. `posts` is the post list:
+ * the language home in the "posts" home layout, /posts/ in the "profile" layout.
+ * `publications` and `search` are set only when those features are on.
+ */
+export interface RouteView {
+  home: string
+  posts: string
+  archives: string
+  tags: string
+  categories: string
+  search?: string
+  publications?: string
 }
 
 export interface ThemeContext {
@@ -106,6 +127,7 @@ export interface ThemeContext {
     alternates: Alternate[]
   }
   nav: NavItemView[]
+  routes: RouteView
   seo: SeoView
   assets: ThemeAssets
   theme: unknown
@@ -116,6 +138,8 @@ export interface ThemeContext {
   pageItem?: PageItem
   tag?: TagView
   tags?: TagView[]
+  category?: CategoryView
+  categories?: CategoryView[]
   archives?: ArchiveGroup[]
   pagination?: Pagination
   helpers: ThemeHelpers

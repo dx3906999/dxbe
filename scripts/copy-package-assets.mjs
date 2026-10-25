@@ -3,7 +3,7 @@ import path from 'node:path'
 
 const root = process.cwd()
 const dist = path.join(root, 'dist')
-const themes = ['folio', 'orbital', 'scholar']
+const themes = ['folio', 'orbital', 'scholar', 'apogee', 'capstan']
 
 await rm(path.join(dist, '.nojekyll'), { force: true })
 await rm(path.join(dist, 'pagefind'), { recursive: true, force: true })

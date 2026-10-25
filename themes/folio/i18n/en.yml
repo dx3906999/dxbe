@@ -1,4 +1,7 @@
 nav:
+  posts: Posts
+  categories: Categories
+  publications: Publications
   label: Primary
   home: Home
   archives: Archive
@@ -6,6 +9,10 @@ nav:
   about: About
   search: Search
 page:
+  posts: Posts
+  categories: Categories
+  publications: Publications
+  categoryPosts: '{count} posts'
   tags: Tags
   archives: Archive
   search: Search

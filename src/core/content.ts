@@ -6,10 +6,19 @@ import { z } from 'zod'
 import { parseDate, yearOf } from '../shared/date.ts'
 import { BuildError } from '../shared/errors.ts'
 import { raw } from '../shared/html.ts'
-import { pagePath, postPath, tagPath } from '../shared/url.ts'
+import { categoryPath, pagePath, postPath, tagPath } from '../shared/url.ts'
 import type { LoadedConfig } from './config.ts'
 import { createMarkdownRenderer } from './markdown.ts'
-import type { Alternate, ArchiveGroup, ContentSet, PageItem, Post, TagView } from './types.ts'
+import type {
+  Alternate,
+  ArchiveGroup,
+  CategoryView,
+  ContentSet,
+  PageItem,
+  Post,
+  Publication,
+  TagView,
+} from './types.ts'
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const TRANSLATION_KEY_PATTERN = /^[a-zA-Z0-9._-]+$/
@@ -21,6 +30,7 @@ const frontmatterSchema = z
     date: z.string().min(1),
     updated: z.string().optional(),
     tags: z.array(z.string().min(1)).default([]),
+    categories: z.array(z.string().min(1)).default([]),
     slug: z.string().optional(),
     translationKey: z.string().optional(),
     summary: z.string().optional(),
@@ -29,9 +39,24 @@ const frontmatterSchema = z
   })
   .strict()
 
+const publicationSchema = z
+  .object({
+    title: z.string().min(1),
+    authors: z.union([z.string().min(1), z.array(z.string().min(1))]).default([]),
+    venue: z.string().optional(),
+    year: z.union([z.string(), z.number()]).optional(),
+    type: z.string().optional(),
+    note: z.string().optional(),
+    links: z
+      .array(z.object({ label: z.string().min(1), url: z.string().min(1) }).strict())
+      .default([]),
+  })
+  .strict()
+
 const pageFrontmatterSchema = z
   .object({
     title: z.string().min(1),
+    publications: z.array(publicationSchema).optional(),
     date: z.string().optional(),
     updated: z.string().optional(),
     slug: z.string().optional(),
@@ -265,6 +290,14 @@ async function buildPost(
 
   const frontmatter = checked.data
   const slug = resolveSlug(frontmatter, entry.name, relativeFile)
+  // a post slug "page" would collide with /posts/page/<n>/ once the list lives at /posts/
+  if (slug === 'page' && loaded.config.home.layout === 'profile') {
+    throw new BuildError('Post slug "page" is reserved when home.layout is "profile"', {
+      code: 'CONTENT',
+      file: relativeFile,
+      hint: 'the post list is paginated under /posts/page/<n>/',
+    })
+  }
   const translationKey = resolveTranslationKey(frontmatter, slug, relativeFile)
   const date = parseDate(frontmatter.date, 'date', relativeFile)
   if (frontmatter.updated) parseDate(frontmatter.updated, 'updated', relativeFile)
@@ -283,6 +316,7 @@ async function buildPost(
     timestamp: date.getTime(),
     updated: frontmatter.updated,
     tags: [...new Set(frontmatter.tags.map((tag) => tag.trim()).filter(Boolean))],
+    categories: [...new Set(frontmatter.categories.map((name) => name.trim()).filter(Boolean))],
     summary: frontmatter.summary?.trim() || rendered.excerpt,
     draft: frontmatter.draft,
     url: postPath(lang, loaded.config.locales.default, slug),
@@ -297,7 +331,30 @@ async function buildPost(
   }
 }
 
-const RESERVED_PAGE_SLUGS = new Set(['posts', 'tags', 'archives', 'search', 'page', '404'])
+const RESERVED_PAGE_SLUGS = new Set([
+  'posts',
+  'tags',
+  'categories',
+  'archives',
+  'search',
+  'page',
+  '404',
+])
+
+function toPublications(
+  entries: z.output<typeof publicationSchema>[] | undefined,
+): Publication[] | undefined {
+  if (!entries) return undefined
+  return entries.map((entry) => ({
+    title: entry.title,
+    authors: typeof entry.authors === 'string' ? [entry.authors] : entry.authors,
+    venue: entry.venue,
+    year: entry.year === undefined ? undefined : String(entry.year),
+    type: entry.type,
+    note: entry.note,
+    links: entry.links,
+  }))
+}
 
 async function buildPage(
   loaded: LoadedConfig,
@@ -350,6 +407,7 @@ async function buildPage(
     slug,
     translationKey,
     title: frontmatter.title,
+    publications: toPublications(frontmatter.publications),
     summary: frontmatter.description?.trim() || frontmatter.summary?.trim() || rendered.excerpt,
     draft: frontmatter.draft,
     url: pagePath(lang, loaded.config.locales.default, slug),
@@ -396,28 +454,53 @@ function linkTranslations<
   }
 }
 
-function buildTags(posts: Post[], lang: string, loaded: LoadedConfig): TagView[] {
+function buildTaxonomy(
+  posts: Post[],
+  names: (post: Post) => string[],
+  urlFor: (slug: string) => string,
+  label: string,
+): TagView[] {
   const counts = new Map<string, number>()
   for (const post of posts) {
-    for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
+    for (const name of names(post)) counts.set(name, (counts.get(name) ?? 0) + 1)
   }
 
   const slugOwner = new Map<string, string>()
-  const tags: TagView[] = []
+  const items: TagView[] = []
   for (const [name, count] of counts) {
     const slug = tagSlug(name)
     const owner = slugOwner.get(slug)
     if (owner && owner !== name) {
-      throw new BuildError(`Tags "${owner}" and "${name}" produce the same slug "${slug}"`, {
+      throw new BuildError(`${label} "${owner}" and "${name}" produce the same slug "${slug}"`, {
         code: 'CONTENT',
-        hint: 'rename one tag or add a manual alias',
+        hint: 'rename one of them or add a manual alias',
       })
     }
     slugOwner.set(slug, name)
-    tags.push({ name, slug, url: tagPath(lang, loaded.config.locales.default, slug), count })
+    items.push({ name, slug, url: urlFor(slug), count })
   }
 
-  return tags.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+  return items.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+}
+
+function buildTags(posts: Post[], lang: string, loaded: LoadedConfig): TagView[] {
+  const defaultLang = loaded.config.locales.default
+  return buildTaxonomy(
+    posts,
+    (post) => post.tags,
+    (slug) => tagPath(lang, defaultLang, slug),
+    'Tags',
+  )
+}
+
+function buildCategories(posts: Post[], lang: string, loaded: LoadedConfig): CategoryView[] {
+  const defaultLang = loaded.config.locales.default
+  return buildTaxonomy(
+    posts,
+    (post) => post.categories,
+    (slug) => categoryPath(lang, defaultLang, slug),
+    'Categories',
+  )
 }
 
 function buildArchives(posts: Post[], timeZone: string): ArchiveGroup[] {
@@ -452,7 +535,10 @@ export async function scanContent(loaded: LoadedConfig, options: ScanOptions): P
     ).filter((post): post is Post => post !== undefined)
     const pages = (
       await Promise.all(pageEntries.map((entry) => buildPage(loaded, lang, entry, options, render)))
-    ).filter((page): page is PageItem => page !== undefined)
+    )
+      .filter((page): page is PageItem => page !== undefined)
+      // the publications page only exists when the feature is on
+      .filter((page) => loaded.config.features.publications || page.slug !== 'publications')
 
     checkDuplicate(posts, lang, 'post')
     checkDuplicate(pages, lang, 'page')
@@ -478,10 +564,12 @@ export async function scanContent(loaded: LoadedConfig, options: ScanOptions): P
   linkTranslations(pagesByLang, loaded)
 
   const tagsByLang: Record<string, TagView[]> = {}
+  const categoriesByLang: Record<string, CategoryView[]> = {}
   const archivesByLang: Record<string, ArchiveGroup[]> = {}
   for (const lang of languages) {
     const posts = postsByLang[lang] ?? []
     tagsByLang[lang] = buildTags(posts, lang, loaded)
+    categoriesByLang[lang] = buildCategories(posts, lang, loaded)
     archivesByLang[lang] = buildArchives(posts, loaded.config.site.timezone)
   }
 
@@ -499,5 +587,20 @@ export async function scanContent(loaded: LoadedConfig, options: ScanOptions): P
     // A missing content directory is reported by the empty-post warning above.
   }
 
-  return { postsByLang, pagesByLang, tagsByLang, archivesByLang, warnings }
+  if (loaded.config.home.layout === 'profile') {
+    const slug = loaded.config.home.page
+    for (const lang of languages) {
+      if (!(pagesByLang[lang] ?? []).some((page) => page.slug === slug)) {
+        throw new BuildError(
+          `home.layout is "profile" but content/${lang}/pages/${slug}.md is missing`,
+          {
+            code: 'CONTENT',
+            hint: 'add the page, point home.page at an existing page, or use home.layout "posts"',
+          },
+        )
+      }
+    }
+  }
+
+  return { postsByLang, pagesByLang, tagsByLang, categoriesByLang, archivesByLang, warnings }
 }

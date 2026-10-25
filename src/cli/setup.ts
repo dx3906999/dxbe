@@ -182,7 +182,7 @@ export async function runSetup(argv: string[] = process.argv.slice(2)): Promise<
       answers.taglineEn = await ask('English tagline', answers.taglineEn)
       answers.url = await ask('Site URL (origin only)', answers.url)
       answers.domain = await ask('Custom domain (optional)', answers.domain)
-      answers.theme = await ask('Theme (folio/orbital/scholar)', answers.theme)
+      answers.theme = await ask('Theme (folio/orbital/scholar/apogee/capstan)', answers.theme)
       answers.repoOwner = await ask('GitHub owner (optional)', answers.repoOwner)
       answers.repoName = await ask('GitHub repository (optional)', answers.repoName)
     } finally {
@@ -190,8 +190,10 @@ export async function runSetup(argv: string[] = process.argv.slice(2)): Promise<
     }
   }
 
-  if (!['folio', 'orbital', 'scholar'].includes(answers.theme)) {
-    throw new Error(`Unknown theme "${answers.theme}"; choose folio, orbital, or scholar`)
+  if (!['folio', 'orbital', 'scholar', 'apogee', 'capstan'].includes(answers.theme)) {
+    throw new Error(
+      `Unknown theme "${answers.theme}"; choose folio, orbital, scholar, apogee, or capstan`,
+    )
   }
   try {
     new URL(answers.url)

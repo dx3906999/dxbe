@@ -84,9 +84,28 @@ const featuresSchema = z
     search: z.boolean().default(true),
     math: z.boolean().default(true),
     autoLanguage: z.boolean().default(true),
+    /** Build content/<lang>/pages/publications.md at /publications/ with the publications layout. */
+    publications: z.boolean().default(false),
   })
   .strict()
-  .default({ search: true, math: true, autoLanguage: true })
+  .default({ search: true, math: true, autoLanguage: true, publications: false })
+
+const homeSchema = z
+  .object({
+    /**
+     * posts: the language home is the paginated post list (default).
+     * profile: the language home renders a page (a CV or self-introduction) and the
+     * post list moves to /posts/.
+     */
+    layout: z.enum(['posts', 'profile']).default('posts'),
+    /** Page slug used as the profile home; that page is not published at its own URL. */
+    page: z
+      .string()
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must be a page slug')
+      .default('home'),
+  })
+  .strict()
+  .default({ layout: 'posts', page: 'home' })
 
 const paginationSchema = z
   .object({
@@ -137,6 +156,7 @@ export const siteConfigSchema = z
       { key: 'tags', path: '/tags/', external: false },
       { key: 'about', path: '/about/', external: false },
     ]),
+    home: homeSchema,
     pagination: paginationSchema,
     features: featuresSchema,
     markdown: markdownSchema,

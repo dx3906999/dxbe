@@ -9,10 +9,11 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 ## 特性
 
 - 中文在 `/`，英文在 `/en/`，不生成 `/zh/`；首页可按浏览器语言选择入口，手动切换后记住选择
-- 三套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术）
+- 五套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术）、`apogee`（NASA punk）、`capstan`（磁带未来主义）
 - 站点身份、语言、导航、域名、许可证、主题全部在 `site.config.ts`
 - Markdown + YAML frontmatter，构建时渲染，客户端零框架
-- 标签、归档、分页、Atom、sitemap、robots、404、SEO/OG、JSON-LD
+- 标签、分类、归档、分页、Atom、sitemap、robots、404、SEO/OG、JSON-LD
+- 可选的个人主页布局：首页放简介或简历，文章列表移到 `/posts/`；可选的发表（publications）页
 - Pagefind 全文搜索，按语言过滤，排除代码和公式
 - KaTeX 构建时渲染，仅数学页面加载 CSS
 - 确定性构建、内部链接检查、SEO 检查、主题一致性测试
@@ -122,7 +123,7 @@ site.config.ts + content/
 - `site.customDomain`：设置后生成 `dist/CNAME`
 - `site.timezone`：日期展示时区
 - `site.license`：页脚展示的代码/内容许可证
-- `theme.name`：`folio`、`orbital` 或 `scholar`
+- `theme.name`：`folio`、`orbital`、`scholar`、`apogee` 或 `capstan`
 - `theme.config`：主题自己的配置，由主题的 zod schema 校验
 - `nav`：导航项，路径是语言无关的，渲染时自动加语言前缀
 - `pagination.perPage`：每页文章数
@@ -177,6 +178,8 @@ draft: false
 | `folio` | 独立杂志 / 文学期刊；衬线正文、大留白、细规则线 | `theme.name: 'folio'` |
 | `orbital` | 70 年代技术手册 / CRT 终端；等宽元信息、网格、磷光强调色 | `theme.name: 'orbital'` |
 | `scholar` | 期刊论文；摘要、编号章节、左侧目录、打印样式 | `theme.name: 'scholar'` |
+| `apogee` | NASA punk；骨白硬件面板、方格纸、五色条纹、检查清单式目录、Archivo / JetBrains Mono | `theme.name: 'apogee'` |
+| `capstan` | 磁带未来主义；米色机身、琴键式按钮、荧光屏、在两根滚轴间走纸的正文、Chakra Petch | `theme.name: 'capstan'` |
 
 本地预览某套主题：
 
@@ -239,7 +242,7 @@ npm pack --dry-run
 引擎仓库：
 
 ```
-themes/              folio / orbital / scholar（随包发布）
+themes/              folio / orbital / scholar / apogee / capstan（随包发布）
 src/core/            配置、扫描、Markdown、路由、渲染、输出
 src/theme/           主题 API、加载器、资源、i18n
 src/cli/             bin 子命令、检查、Pagefind、开发服务器

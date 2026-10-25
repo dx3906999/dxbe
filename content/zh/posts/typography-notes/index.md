@@ -2,6 +2,7 @@
 title: 三套主题的排版笔记
 date: 2026-10-21T09:30:00+08:00
 tags: [排版, 主题]
+categories: [设计]
 slug: typography-notes
 translationKey: typography-notes
 summary: folio、orbital、scholar 三套主题不是换色皮肤，各自的排版系统决定了它们的样子。

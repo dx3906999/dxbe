@@ -1,0 +1,73 @@
+nav:
+  posts: Posts
+  categories: Categories
+  publications: Publications
+  label: Main navigation
+  home: Home
+  archives: Archives
+  tags: Tags
+  about: About
+  search: Search
+page:
+  posts: Posts
+  categories: Categories
+  publications: Publications
+  categoryPosts: '{count} posts'
+  tags: Tags
+  archives: Archives
+  search: Search
+  notFound: Signal lost
+  notFoundBody: Nothing lives at this address. The link may be stale, or the post has moved.
+  pageOf: Page {n}
+  tagPosts: '{count} posts'
+  postsUnit: posts
+post:
+  toc: Procedure
+  prev: Previous
+  next: Next
+  minutes: min
+  tags: Tags
+  empty: No posts yet.
+  backHome: Back home
+  date: Filed
+  updated: Revised
+  read: Read
+  lang: Lang
+  log: Log
+paginator:
+  prev: Newer
+  next: Older
+  page: Page {n}
+  label: Pagination
+toc:
+  title: Procedure
+theme:
+  toggle: Toggle light and dark
+  light: Day
+  dark: Night
+footer:
+  license: License
+  source: Source
+  rss: RSS
+  built: Built with dxbe
+language:
+  switch: Language
+search:
+  placeholder: Search posts
+  loading: Searching...
+  empty: No results.
+  error: The search index is missing or failed to load.
+  results: '{n} results'
+  noscript: Search needs JavaScript.
+a11y:
+  skip: Skip to content
+  menu: Open navigation
+  close: Close navigation
+tag:
+  empty: No tags yet.
+panel:
+  telemetry: Telemetry
+  recent: Recent logs
+  tags: Tags
+  related: Filed under
+  route: Route

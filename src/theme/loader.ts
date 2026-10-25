@@ -322,11 +322,15 @@ export async function copyTaskAssets(
 
 const FALLBACKS: Record<PageKind, PageKind[]> = {
   index: ['index'],
+  home: ['home', 'page', 'index'],
   post: ['post', 'page', 'index'],
   page: ['page', 'post', 'index'],
+  publications: ['publications', 'page', 'post', 'index'],
   archive: ['archive', 'index'],
   tag: ['tag', 'archive', 'index'],
   tags: ['tags', 'archive', 'index'],
+  category: ['category', 'tag', 'archive', 'index'],
+  categories: ['categories', 'tags', 'archive', 'index'],
   search: ['search', 'index'],
   notFound: ['notFound', 'page', 'index'],
 }

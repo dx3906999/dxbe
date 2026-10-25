@@ -2,15 +2,17 @@ import { access, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { type BuildResult, buildSite } from '../src/core/build.ts'
-import { loadConfig } from '../src/core/config.ts'
+import { type LoadedConfig, loadConfig } from '../src/core/config.ts'
 import { Logger } from '../src/shared/logger.ts'
+import { absoluteUrl } from '../src/shared/url.ts'
 
 const root = process.cwd()
 const outDir = '.test-dist'
+let loaded: LoadedConfig
 let result: BuildResult
 
 beforeAll(async () => {
-  const loaded = await loadConfig({ root, production: false })
+  loaded = await loadConfig({ root, production: false })
   result = await buildSite(loaded, {
     outDir,
     atomic: false,
@@ -53,6 +55,41 @@ describe('site build', () => {
     const html = await readFile(path.join(root, outDir, enPost?.outFile ?? ''), 'utf8')
     expect(html).not.toContain('<a href="/en/" aria-current="page">')
     expect(html).toContain('<a href="/en/" aria-current="false">Home</a>')
+  })
+
+  it('renders the profile home and moves the post list to /posts/', async () => {
+    const home = result.tasks.find((task) => task.lang === 'zh' && task.urlPath === '/')
+    expect(home?.kind).toBe('home')
+    expect(home?.pageItem?.slug).toBe('home')
+    // the profile page is the home, not a page of its own
+    expect(result.tasks.some((task) => task.urlPath === '/home/')).toBe(false)
+    const list = result.tasks.find((task) => task.lang === 'en' && task.urlPath === '/en/posts/')
+    expect(list?.kind).toBe('index')
+    expect(list?.posts?.length).toBeGreaterThan(0)
+    const html = await readFile(path.join(root, outDir, 'posts', 'index.html'), 'utf8')
+    // CI overrides SITE_URL, so derive the expected origin from the loaded config
+    const canonical = absoluteUrl(loaded.url, loaded.base, '/posts/')
+    expect(html).toContain(`<link rel="canonical" href="${canonical}">`)
+  })
+
+  it('builds category pages from post frontmatter', async () => {
+    const index = result.tasks.find((task) => task.lang === 'zh' && task.kind === 'categories')
+    expect(index?.urlPath).toBe('/categories/')
+    expect(index?.categories?.length).toBeGreaterThan(0)
+    const category = result.tasks.find((task) => task.lang === 'en' && task.kind === 'category')
+    expect(category?.urlPath).toMatch(/^\/en\/categories\/[^/]+\/$/)
+    expect(
+      category?.posts?.every((post) => post.categories.includes(category.category?.name ?? '')),
+    ).toBe(true)
+    await expect(
+      access(path.join(root, outDir, 'categories', 'index.html')),
+    ).resolves.toBeUndefined()
+  })
+
+  it('renders the publications page when the feature is on', async () => {
+    const page = result.tasks.find((task) => task.lang === 'zh' && task.kind === 'publications')
+    expect(page?.urlPath).toBe('/publications/')
+    expect(page?.pageItem?.publications?.[0]?.authors.length).toBeGreaterThan(0)
   })
 
   it('writes feeds, sitemap, robots, and 404', async () => {

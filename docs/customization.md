@@ -76,16 +76,41 @@ npx dxbe setup --yes --force \
 | `site.customDomain` | 自定义域名；设置后生成 `dist/CNAME` |
 | `site.timezone` | 日期展示时区，默认 `Asia/Shanghai` |
 | `site.license` | 页脚展示的代码/内容许可证 |
-| `theme.name` | `folio` / `orbital` / `scholar` |
+| `theme.name` | `folio` / `orbital` / `scholar` / `apogee` / `capstan` |
 | `theme.config` | 主题自己的配置 |
+| `home.layout` | `posts`（默认）首页是文章列表；`profile` 首页渲染一个页面（简历/自我介绍），文章列表移到 `/posts/` |
+| `home.page` | `profile` 模式下作为首页的页面 slug，默认 `home`（即 `pages/home.md`）；该页面不再单独发布 |
 | `nav` | 导航项，path 与语言无关 |
 | `pagination.perPage` | 每页文章数 |
 | `features.search` | 是否生成搜索页和索引 |
 | `features.math` | 是否启用 KaTeX |
 | `features.autoLanguage` | 首页按浏览器语言跳转，默认开启；手动语言选择会记住 |
+| `features.publications` | 默认关闭；开启后 `pages/publications.md` 以 publications 布局发布在 `/publications/`，关闭时页面和导航项都不生成 |
 | `markdown.allowHtml` | 是否允许原始 HTML（默认 false，开启时 sanitize） |
 
 `features.autoLanguage` 只在默认语言首页读取 `navigator.languages`，按偏好顺序匹配第一个站点支持的语言；如果匹配的是默认语言就停留。每个标签页只自动跳转一次，文章、页面和其他语言首页不会自动重定向；语言切换链接会写入 localStorage，后续访问首页优先按手动选择。
+
+### 个人主页布局
+
+参考学术个人站的结构：首页放简介，文章、发表、分类、标签、归档各自一页。
+
+```ts
+home: { layout: 'profile', page: 'home' },
+features: { publications: true },
+nav: [
+  { key: 'home', path: '/' },
+  { key: 'publications', path: '/publications/' },
+  { key: 'posts', path: '/posts/' },
+  { key: 'categories', path: '/categories/' },
+  { key: 'tags', path: '/tags/' },
+  { key: 'archives', path: '/archives/' },
+],
+```
+
+- 每种语言都要有 `content/<lang>/pages/<home.page>.md`，缺失会构建失败。
+- 文章列表在 `/posts/`，分页为 `/posts/page/<n>/`；此模式下文章 slug 不能是 `page`。
+- `/posts/` 导航项只在 `profile` 模式下出现；`/publications/` 导航项只在开关打开且页面存在时出现。
+- 分类页 `/categories/` 和 `/categories/<slug>/` 总是生成，数据来自文章的 `categories` frontmatter。
 
 主题配置由主题的 zod schema 校验。比如：
 
