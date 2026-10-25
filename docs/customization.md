@@ -8,7 +8,7 @@
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.6.0/dxbe-0.6.0.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.6.1/dxbe-0.6.1.tgz
 npx dxbe setup
 npx dxbe dev
 ```
@@ -17,26 +17,28 @@ npx dxbe dev
 
 ```
 content/
-public/
+public/          # 可选；没有 favicon.svg 时用 dxbe 自带的
 site.config.ts
 package.json
+.nvmrc
+.gitignore
 .github/workflows/deploy.yml
 ```
 
-`dxbe setup` 会生成 `site.config.ts`，并在覆盖前生成 `site.config.ts.bak`。把引擎仓库的 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`，然后在 Pages 里选择 **GitHub Actions**。
+`dxbe setup` 会生成 `site.config.ts`，并在覆盖前生成 `site.config.ts.bak`。它还会把 `package.json` 设为 `"type": "module"`、补上缺少的 dxbe 脚本，并在缺失时生成 `.nvmrc` 和 `.gitignore`（已有的 `.gitignore` 只追加缺少的条目）。把引擎仓库的 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`，然后在 Pages 里选择 **GitHub Actions**。
 
-在博客仓库的 `package.json` 加脚本：
+`dxbe setup` 会在博客仓库的 `package.json` 里补上这些脚本（已有的同名脚本保持不变）：
 
 ```json
 {
   "scripts": {
     "dev": "dxbe dev",
     "build": "dxbe build",
-    "build:all": "dxbe check",
+    "check": "dxbe check",
     "preview": "dxbe preview",
     "new": "dxbe new",
-    "clean": "dxbe clean",
-    "setup": "dxbe setup"
+    "index": "dxbe index",
+    "clean": "dxbe clean"
   }
 }
 ```

@@ -117,8 +117,10 @@ describe('site build', () => {
     expect(sitemap).toContain('x-default')
   })
 
-  it('copies the favicon and nojekyll marker', async () => {
-    await expect(access(path.join(root, outDir, 'favicon.svg'))).resolves.toBeUndefined()
+  it('falls back to the default favicon and writes the nojekyll marker', async () => {
+    // the demo site has no public/favicon.svg, so this is the engine default
+    const favicon = await readFile(path.join(root, outDir, 'favicon.svg'), 'utf8')
+    expect(favicon).toBe(await readFile(path.join(root, 'src', 'assets', 'favicon.svg'), 'utf8'))
     await expect(access(path.join(root, outDir, '.nojekyll'))).resolves.toBeUndefined()
   })
 })

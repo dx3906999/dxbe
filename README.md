@@ -22,20 +22,20 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 
 ## 快速开始
 
-需要 Node.js 24 或更高版本。下面的命令安装 v0.6.0 发布版；apogee / capstan 主题、个人主页、分类、发表页和 PDF 嵌入都从 0.6.0 开始提供。
+需要 Node.js 24 或更高版本。下面的命令安装 v0.6.1 发布版；apogee / capstan 主题、个人主页、分类、发表页和 PDF 嵌入都从 0.6.0 开始提供。
 
 ```bash
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.6.0/dxbe-0.6.0.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.6.1/dxbe-0.6.1.tgz
 npx dxbe setup
 npx dxbe dev
 ```
 
-发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.6.0`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
+发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.6.1`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
 
-`setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。非交互使用：
+`setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。它同时把仓库补成能直接构建和部署的样子：`package.json` 设为 `"type": "module"`（`npm init -y` 默认是 `commonjs`，配置文件会加载失败）并补上 `dev`、`build`、`check` 等脚本，生成 `.nvmrc`（部署工作流从这里读 Node 版本）和 `.gitignore`。已有的脚本和文件不会被覆盖。非交互使用：
 
 ```bash
 npx dxbe setup --yes --force \
@@ -48,10 +48,12 @@ npx dxbe setup --yes --force \
 
 ```
 content/
-public/                    # 可选：favicon、CNAME 等
+public/                    # 可选：favicon、CNAME 等；没有 favicon.svg 时用 dxbe 自带的
 themes/                    # 可选：覆盖或新增主题
 site.config.ts
 package.json
+.nvmrc                     # setup 生成
+.gitignore                 # setup 生成
 .github/workflows/deploy.yml
 ```
 
@@ -59,18 +61,18 @@ package.json
 
 ## 命令
 
-在博客仓库的 `package.json` 里加：
+`dxbe setup` 会在博客仓库的 `package.json` 里补上这些脚本（已有的同名脚本保持不变）：
 
 ```json
 {
   "scripts": {
     "dev": "dxbe dev",
     "build": "dxbe build",
-    "build:all": "dxbe check",
+    "check": "dxbe check",
     "preview": "dxbe preview",
     "new": "dxbe new",
-    "clean": "dxbe clean",
-    "setup": "dxbe setup"
+    "index": "dxbe index",
+    "clean": "dxbe clean"
   }
 }
 ```

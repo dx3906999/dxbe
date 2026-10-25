@@ -223,26 +223,26 @@ export async function copyThemeAssets(
   return map
 }
 
+/** A file from src/assets, which ships as dist/src/assets in the package. */
+function engineAsset(name: string): string {
+  const source = path.join(packageRoot(), 'src', 'assets', name)
+  const packaged = path.join(packageRoot(), 'dist', 'src', 'assets', name)
+  const candidates = runningFromDist() ? [packaged, source] : [source, packaged]
+  const found = candidates.find((candidate) => existsSync(candidate))
+  if (!found) {
+    throw new BuildError(`${name} was not found in the dxbe package`, {
+      code: 'THEME',
+    })
+  }
+  return found
+}
+
 export async function copySearchAsset(
   _root: string,
   outDir: string,
   base: string,
 ): Promise<string> {
-  const candidates = runningFromDist()
-    ? [
-        path.join(packageRoot(), 'dist', 'src', 'assets', 'search.js'),
-        path.join(packageRoot(), 'src', 'assets', 'search.js'),
-      ]
-    : [
-        path.join(packageRoot(), 'src', 'assets', 'search.js'),
-        path.join(packageRoot(), 'dist', 'src', 'assets', 'search.js'),
-      ]
-  const source = candidates.find((candidate) => existsSync(candidate))
-  if (!source) {
-    throw new BuildError('search.js was not found in the dxbe package', {
-      code: 'THEME',
-    })
-  }
+  const source = engineAsset('search.js')
   const buffer = await readFile(source)
   const destination = path.join(outDir, 'assets', 'search.js')
   await mkdir(path.dirname(destination), { recursive: true })
@@ -282,6 +282,12 @@ export async function copyPublicAssets(
     await cp(publicDir, outDir, { recursive: true })
   } else {
     logger.debug('no public/ directory')
+  }
+  // every theme links /favicon.svg; a new blog should not ship a broken link
+  const favicon = path.join(outDir, 'favicon.svg')
+  if (!(await pathExists(favicon))) {
+    await copyFile(engineAsset('favicon.svg'), favicon)
+    logger.debug('using the default favicon.svg')
   }
   const nojekyll = path.join(outDir, '.nojekyll')
   if (!(await pathExists(nojekyll))) {

@@ -27,7 +27,6 @@ for (const theme of themes) {
 }
 
 await mkdir(path.join(dist, 'src', 'assets'), { recursive: true })
-await cp(
-  path.join(root, 'src', 'assets', 'search.js'),
-  path.join(dist, 'src', 'assets', 'search.js'),
-)
+for (const asset of ['search.js', 'favicon.svg']) {
+  await cp(path.join(root, 'src', 'assets', asset), path.join(dist, 'src', 'assets', asset))
+}
