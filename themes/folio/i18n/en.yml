@@ -52,6 +52,9 @@ search:
   noscript: Search requires JavaScript.
 a11y:
   skip: Skip to content
+  menu: Open navigation
+  breadcrumb: Breadcrumb
+  panel: Sidebar
 tag:
   empty: No tags yet.
 home:

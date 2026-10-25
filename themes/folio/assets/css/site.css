@@ -13,7 +13,9 @@
     "Microsoft YaHei", sans-serif;
   --font-mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
   --measure: 42rem;
-  --page: 72rem;
+  --main: 46rem;
+  --rail-w: 15rem;
+  --top-h: 3.25rem;
 }
 
 html[data-theme="dark"] {
@@ -98,11 +100,6 @@ figcaption {
   font-size: 0.78rem;
 }
 
-.wrap {
-  width: min(100% - 3rem, var(--page));
-  margin-inline: auto;
-}
-
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -120,20 +117,49 @@ figcaption {
   top: 1rem;
 }
 
-.site-header {
-  border-bottom: 1px solid var(--rule);
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.header-inner {
+/* shell: navigation rail on the left, the reading stage on the right */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.scrim {
+  display: none;
+}
+
+.stage {
   display: flex;
-  align-items: baseline;
-  gap: 1.4rem;
-  flex-wrap: wrap;
-  padding: 1.35rem 0;
+  flex-direction: column;
+  min-width: 0;
 }
 
-.brand {
-  margin-right: auto;
+.rail {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 100vh;
+  border-right: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+.rail-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+  height: 100%;
+  padding: 2rem 1.5rem 1.6rem;
+  overflow-y: auto;
 }
 
 .site-title {
@@ -142,6 +168,7 @@ figcaption {
   font-size: 1.18rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+  line-height: 1.3;
   text-decoration: none;
 }
 
@@ -150,34 +177,53 @@ figcaption {
 }
 
 .site-tagline {
-  margin: 0.15rem 0 0;
+  margin: 0.45rem 0 0;
   color: var(--ink-soft);
   font-family: var(--font-sans);
   font-size: 0.76rem;
+  line-height: 1.55;
 }
 
 .site-nav {
   display: flex;
-  gap: 1.05rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-left: -1.5rem;
   font-family: var(--font-sans);
-  font-size: 0.8rem;
+  font-size: 0.84rem;
 }
 
 .site-nav a {
+  padding: 0.38rem 1.5rem 0.38rem calc(1.5rem - 2px);
+  border-left: 2px solid transparent;
   color: var(--ink-soft);
   text-decoration: none;
 }
 
-.site-nav a:hover,
-.site-nav a[aria-current="page"] {
+.site-nav a:hover {
   color: var(--accent);
+}
+
+.site-nav a[aria-current="page"] {
+  border-left-color: var(--accent);
+  color: var(--accent);
+}
+
+.rail-foot {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: auto;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
 }
 
 .header-tools {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
   font-family: var(--font-sans);
   font-size: 0.74rem;
 }
@@ -216,8 +262,215 @@ figcaption {
   color: var(--accent);
 }
 
+.rail-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  margin: 0;
+}
+
+.rail-links a {
+  color: var(--ink-soft);
+}
+
+.rail-links a:hover {
+  color: var(--accent);
+}
+
+/* top bar: breadcrumb, search, reading progress */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  height: var(--top-h);
+  padding: 0 2.5rem;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  color: var(--ink-soft);
+}
+
+.crumb a {
+  flex: none;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.crumb a:hover {
+  color: var(--accent);
+}
+
+.crumb [aria-current] {
+  overflow: hidden;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crumb-sep {
+  flex: none;
+  color: var(--rule);
+}
+
+.topbar-search {
+  flex: none;
+  margin-left: auto;
+}
+
+.topbar-search input {
+  width: 12rem;
+  padding: 0.3rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  transition: width 200ms ease;
+}
+
+.topbar-search input:focus {
+  width: 16rem;
+  outline: 0;
+  border-bottom-color: var(--accent);
+}
+
+.progress {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+}
+
+body:not(.page-post):not(.page-page) .progress {
+  display: none;
+}
+
+/* stage: the main column, plus the side panel on lists and articles */
+
+.width-wide {
+  --main: 56rem;
+}
+
+.stage-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, var(--main));
+  justify-content: center;
+  gap: 3.5rem;
+  width: 100%;
+  padding: 3.5rem 2.5rem 5rem;
+}
+
+.has-panel .stage-grid {
+  grid-template-columns: minmax(0, var(--main)) 14rem;
+}
+
 .site-main {
-  padding: 3.5rem 0 5rem;
+  min-width: 0;
+  outline: none;
+}
+
+.panel {
+  position: sticky;
+  top: calc(var(--top-h) + 2rem);
+  align-self: start;
+  display: grid;
+  gap: 2rem;
+  max-height: calc(100vh - var(--top-h) - 3.5rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  font-family: var(--font-sans);
+}
+
+.panel-module {
+  padding-left: 1rem;
+  border-left: 1px solid var(--rule);
+}
+
+.panel-title {
+  margin: 0 0 0.6rem;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.panel-recent {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel-recent li {
+  margin: 0.6rem 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.panel-recent a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.panel-recent a:hover {
+  color: var(--accent);
+}
+
+.panel-recent time {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+}
+
+.panel-terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.8rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.78rem;
+}
+
+.panel-terms a {
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.panel-terms a:hover {
+  color: var(--accent);
 }
 
 .index-header {
@@ -397,9 +650,6 @@ figcaption {
 }
 
 .post-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2.5rem;
   max-width: var(--measure);
   margin: 0 auto;
 }
@@ -617,10 +867,6 @@ html[data-theme="dark"] .shiki {
   color: var(--accent);
 }
 
-.post-aside {
-  display: none;
-}
-
 .toc-mobile {
   max-width: var(--measure);
   margin: 0 auto 2rem;
@@ -821,7 +1067,7 @@ html[data-theme="dark"] .shiki {
 }
 
 .site-footer {
-  padding: 2rem 0 3rem;
+  padding: 1.6rem 2.5rem 2.4rem;
   border-top: 1px solid var(--rule);
   color: var(--ink-soft);
   font-family: var(--font-sans);
@@ -848,62 +1094,108 @@ html[data-theme="dark"] .shiki {
   color: var(--accent);
 }
 
-@media (min-width: 64rem) {
-  /* without headings (or when encrypted) there is no aside to make room for */
-  .width-narrow .post-layout.no-toc,
-  .width-wide .post-layout.no-toc {
-    max-width: var(--measure);
-    grid-template-columns: minmax(0, 1fr);
+/* the side panel needs room next to the main column; below that the TOC moves inline */
+@media (max-width: 80rem) {
+  .has-panel .stage-grid {
+    grid-template-columns: minmax(0, var(--main));
   }
 
-  .width-narrow .post-layout {
-    max-width: calc(var(--measure) + 15rem);
-    grid-template-columns: minmax(0, var(--measure)) 12rem;
-    gap: 3rem;
+  .panel {
+    display: none;
   }
+}
 
-  .width-wide .post-layout {
-    max-width: 62rem;
-    grid-template-columns: minmax(0, 1fr) 14rem;
-    gap: 3.5rem;
-  }
-
-  .post-aside {
-    display: block;
-    align-self: start;
-    position: sticky;
-    top: 2rem;
-    padding-left: 1rem;
-    border-left: 1px solid var(--rule);
-  }
-
+@media (min-width: 80.0625rem) {
   .toc-mobile {
     display: none;
   }
 }
 
+/* the rail becomes a drawer behind the menu button */
+@media (max-width: 60rem) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rail {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(18rem, 86vw);
+    height: auto;
+    transform: translateX(-102%);
+    transition: transform 280ms ease;
+  }
+
+  .rail[data-open] {
+    transform: none;
+    box-shadow: 1.2rem 0 3rem -1.6rem rgb(0 0 0 / 0.45);
+  }
+
+  .scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    display: block;
+    background: rgb(0 0 0 / 0.32);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 240ms ease;
+  }
+
+  .rail[data-open] ~ .scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .topbar {
+    gap: 0.8rem;
+    padding: 0 1.25rem;
+  }
+
+  .menu-toggle {
+    display: grid;
+    flex: none;
+    align-content: center;
+    gap: 4px;
+    width: 2.1rem;
+    height: 1.9rem;
+    padding: 0 0.5rem;
+    border: 1px solid var(--rule);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .menu-toggle span {
+    height: 1px;
+    background: var(--ink);
+  }
+
+  .stage-grid {
+    padding: 2.6rem 1.5rem 4rem;
+  }
+
+  .site-footer {
+    padding: 1.4rem 1.5rem 2rem;
+  }
+}
 @media (max-width: 40rem) {
-  .wrap {
-    width: min(100% - 2rem, var(--page));
+  .stage-grid {
+    padding: 2rem 1rem 3.5rem;
   }
 
-  .site-main {
-    padding-top: 2.4rem;
+  .topbar {
+    padding: 0 1rem;
   }
 
-  .header-inner {
-    align-items: flex-start;
-    gap: 0.8rem;
+  .topbar-search input,
+  .topbar-search input:focus {
+    width: 7.5rem;
   }
 
-  .site-nav {
-    order: 3;
-    width: 100%;
-    gap: 0.8rem;
-  }
-
-  .header-tools {
-    order: 2;
+  .site-footer {
+    padding: 1.4rem 1rem 2rem;
   }
 
   .prev-next {
@@ -919,7 +1211,6 @@ html[data-theme="dark"] .shiki {
     text-align: left;
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -931,9 +1222,11 @@ html[data-theme="dark"] .shiki {
 }
 
 @media print {
-  .site-header,
+  .rail,
+  .scrim,
+  .topbar,
+  .panel,
   .site-footer,
-  .post-aside,
   .toc-mobile,
   .theme-toggle,
   .language-switch,
@@ -953,10 +1246,13 @@ html[data-theme="dark"] .shiki {
     text-decoration: underline;
   }
 
-  .post-layout {
+  .shell,
+  .stage-grid {
     display: block;
+    padding: 0;
   }
 
+  .post-layout,
   .post-header,
   .post-body,
   .page > .post-body {

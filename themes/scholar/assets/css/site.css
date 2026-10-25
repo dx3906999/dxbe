@@ -13,6 +13,9 @@
     "Microsoft YaHei", sans-serif;
   --mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
   --measure: 38rem;
+  --main: 48rem;
+  --rail-w: 16rem;
+  --top-h: 3.25rem;
 }
 
 html[data-theme="dark"] {
@@ -86,11 +89,6 @@ video {
   height: auto;
 }
 
-.wrap {
-  width: min(100% - 3rem, 72rem);
-  margin-inline: auto;
-}
-
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -108,8 +106,48 @@ video {
   top: 1rem;
 }
 
-.scholar-header {
-  padding-top: 2.5rem;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* shell: masthead and navigation in the left rail, the paper on the right */
+
+.scholar-shell {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.scholar-scrim {
+  display: none;
+}
+
+.scholar-stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.scholar-rail {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 100vh;
+  border-right: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+.scholar-rail-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2.4rem 1.5rem 1.6rem;
+  overflow-y: auto;
 }
 
 .masthead {
@@ -120,18 +158,19 @@ video {
   margin: 0 0 0.75rem;
   color: var(--dim);
   font-family: var(--sans);
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   letter-spacing: 0.16em;
+  line-height: 1.6;
   text-transform: uppercase;
 }
 
 .masthead-title {
   color: var(--ink);
   font-family: var(--serif);
-  font-size: clamp(1.9rem, 4vw, 2.9rem);
+  font-size: 1.45rem;
   font-weight: 600;
   letter-spacing: 0.015em;
-  line-height: 1.1;
+  line-height: 1.2;
   text-decoration: none;
 }
 
@@ -140,40 +179,30 @@ video {
 }
 
 .masthead-description {
-  max-width: 42rem;
-  margin: 0.8rem auto 0;
+  margin: 0.7rem 0 0;
   color: var(--dim);
-  font-size: 0.98rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
   text-align: center;
 }
 
 .masthead-rule {
   height: 3px;
-  margin: 1.5rem 0 0;
+  margin: 1.4rem 0 1.2rem;
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
 }
 
-.scholar-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--rule);
-  font-family: var(--sans);
-  font-size: 0.72rem;
-}
-
 .scholar-nav {
   display: flex;
-  gap: 1.35rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-family: var(--sans);
 }
 
 .scholar-nav a {
+  padding: 0.32rem 0;
   color: var(--dim);
   font-size: 0.7rem;
   letter-spacing: 0.12em;
@@ -184,6 +213,23 @@ video {
 .scholar-nav a:hover,
 .scholar-nav a[aria-current="page"] {
   color: var(--accent);
+}
+
+.scholar-nav a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.45em;
+}
+
+.scholar-rail-foot {
+  display: grid;
+  justify-items: center;
+  gap: 0.8rem;
+  margin-top: auto;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: 0.72rem;
 }
 
 .scholar-tools {
@@ -223,8 +269,215 @@ video {
   color: var(--accent);
 }
 
+.scholar-rail-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 0.8rem;
+  margin: 0;
+}
+
+.scholar-rail-links a {
+  color: var(--dim);
+}
+
+.scholar-rail-links a:hover {
+  color: var(--accent);
+}
+
+/* top bar: breadcrumb, search, reading progress */
+
+.scholar-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  height: var(--top-h);
+  padding: 0 2.5rem;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+}
+
+.scholar-menu {
+  display: none;
+}
+
+.scholar-crumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+}
+
+.scholar-crumb a {
+  flex: none;
+  color: var(--dim);
+  text-decoration: none;
+}
+
+.scholar-crumb a:hover {
+  color: var(--accent);
+}
+
+.scholar-crumb [aria-current] {
+  overflow: hidden;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scholar-crumb-sep {
+  flex: none;
+  color: var(--rule);
+}
+
+.scholar-query {
+  flex: none;
+  margin-left: auto;
+}
+
+.scholar-query input {
+  width: 13rem;
+  padding: 0.3rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  transition: width 200ms ease;
+}
+
+.scholar-query input:focus {
+  width: 17rem;
+  outline: 0;
+  border-bottom-color: var(--accent);
+}
+
+.scholar-progress {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.scholar-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+}
+
+body:not(.page-post):not(.page-page) .scholar-progress {
+  display: none;
+}
+
+/* stage: the paper, plus the side panel on lists and articles */
+
+.scholar-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, var(--main));
+  justify-content: center;
+  gap: 3.5rem;
+  width: 100%;
+  padding: 3rem 2.5rem 5rem;
+}
+
+.has-panel .scholar-grid {
+  grid-template-columns: minmax(0, var(--main)) 13rem;
+}
+
 .scholar-main {
-  padding: 3rem 0 5rem;
+  min-width: 0;
+  outline: none;
+}
+
+.scholar-panel {
+  position: sticky;
+  top: calc(var(--top-h) + 2rem);
+  align-self: start;
+  display: grid;
+  gap: 1.8rem;
+  max-height: calc(100vh - var(--top-h) - 3.5rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  font-family: var(--sans);
+}
+
+.scholar-module {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.scholar-recent {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: recent;
+}
+
+.scholar-recent li {
+  margin: 0.55rem 0;
+  font-family: var(--serif);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.scholar-recent a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.scholar-recent a:hover {
+  color: var(--accent);
+}
+
+.scholar-recent time {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--dim);
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  letter-spacing: 0.03em;
+}
+
+.scholar-terms {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.74rem;
+}
+
+.scholar-terms li {
+  padding: 0.25rem 0;
+  border-bottom: 1px dotted var(--rule);
+}
+
+.scholar-terms a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.scholar-terms a:hover {
+  color: var(--accent);
+}
+
+.scholar-module-keywords {
+  margin: 0;
+  color: var(--dim);
+  font-size: 0.74rem;
+  line-height: 1.7;
 }
 
 .scholar-kicker {
@@ -429,32 +682,17 @@ video {
 }
 
 .scholar-layout {
-  display: grid;
-  grid-template-columns: 11rem minmax(0, var(--measure));
-  gap: 3rem;
-  max-width: 52rem;
+  max-width: var(--measure);
   margin: 0 auto;
 }
 
-.scholar-layout.no-toc {
-  grid-template-columns: minmax(0, var(--measure));
-  justify-content: center;
-}
-
-.scholar-toc {
-  align-self: start;
-  position: sticky;
-  top: 2rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--rule);
-  font-family: var(--sans);
-}
-
+.scholar-module-title,
 .scholar-toc .toc-title {
   margin: 0 0 0.5rem;
   color: var(--dim);
   font-family: var(--mono);
   font-size: 0.62rem;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -881,7 +1119,7 @@ html[data-theme="dark"] .shiki span {
 }
 
 .scholar-footer {
-  padding: 1.8rem 0 2.8rem;
+  padding: 1.8rem 2.5rem 2.8rem;
   border-top: 1px solid var(--rule);
   color: var(--dim);
   font-family: var(--sans);
@@ -907,13 +1145,13 @@ html[data-theme="dark"] .shiki span {
   font-style: italic;
 }
 
-@media (max-width: 63.99rem) {
-  .scholar-layout {
-    grid-template-columns: minmax(0, var(--measure));
-    justify-content: center;
+/* the side panel needs room next to the paper; below that the contents move inline */
+@media (max-width: 80rem) {
+  .has-panel .scholar-grid {
+    grid-template-columns: minmax(0, var(--main));
   }
 
-  .scholar-toc {
+  .scholar-panel {
     display: none;
   }
 
@@ -922,21 +1160,91 @@ html[data-theme="dark"] .shiki span {
   }
 }
 
+/* the rail becomes a drawer behind the menu button */
+@media (max-width: 60rem) {
+  .scholar-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scholar-rail {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(18rem, 86vw);
+    height: auto;
+    transform: translateX(-102%);
+    transition: transform 280ms ease;
+  }
+
+  .scholar-rail[data-open] {
+    transform: none;
+    box-shadow: 1.2rem 0 3rem -1.6rem rgb(0 0 0 / 0.45);
+  }
+
+  .scholar-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    display: block;
+    background: rgb(0 0 0 / 0.32);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 240ms ease;
+  }
+
+  .scholar-rail[data-open] ~ .scholar-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .scholar-top {
+    gap: 0.8rem;
+    padding: 0 1.25rem;
+  }
+
+  .scholar-menu {
+    display: grid;
+    flex: none;
+    align-content: center;
+    gap: 4px;
+    width: 2.1rem;
+    height: 1.9rem;
+    padding: 0 0.5rem;
+    border: 1px solid var(--rule);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .scholar-menu span {
+    height: 1px;
+    background: var(--ink);
+  }
+
+  .scholar-grid {
+    padding: 2.4rem 1.5rem 4rem;
+  }
+
+  .scholar-footer {
+    padding: 1.6rem 1.5rem 2.4rem;
+  }
+}
 @media (max-width: 40rem) {
-  .wrap {
-    width: min(100% - 2rem, 72rem);
+  .scholar-grid {
+    padding: 2rem 1rem 3.5rem;
   }
 
-  .scholar-header {
-    padding-top: 1.6rem;
+  .scholar-top {
+    padding: 0 1rem;
   }
 
-  .scholar-bar {
-    gap: 0.7rem;
+  .scholar-query input,
+  .scholar-query input:focus {
+    width: 7.5rem;
   }
 
-  .scholar-main {
-    padding-top: 2.2rem;
+  .scholar-footer {
+    padding: 1.6rem 1rem 2.4rem;
   }
 
   .article-item {
@@ -972,7 +1280,10 @@ html[data-theme="dark"] .shiki span {
 }
 
 @media print {
-  .scholar-header,
+  .scholar-rail,
+  .scholar-scrim,
+  .scholar-top,
+  .scholar-panel,
   .scholar-footer,
   .scholar-toc,
   .scholar-toc-mobile,
@@ -987,6 +1298,12 @@ html[data-theme="dark"] .shiki span {
     background: #fff;
     color: #000;
     font-size: 11pt;
+  }
+
+  .scholar-shell,
+  .scholar-grid {
+    display: block;
+    padding: 0;
   }
 
   .scholar-layout {

@@ -4,7 +4,7 @@
 
 创建博客仓库后：
 
-1. `npm install https://github.com/dx3906999/dxbe/releases/download/v0.8.2/dxbe-0.8.2.tgz`。
+1. `npm install https://github.com/dx3906999/dxbe/releases/download/v0.9.0/dxbe-0.9.0.tgz`。
 2. 复制 `templates/deploy.yml` 到博客仓库的 `.github/workflows/deploy.yml`。
 3. 在博客仓库 Settings → Pages → Source 选择 **GitHub Actions**。
 4. 推送 `main`，或手动运行 **Deploy**。

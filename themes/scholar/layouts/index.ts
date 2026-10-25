@@ -1,6 +1,6 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { baseLayout } from './base.ts'
-import { articleList, pagination } from './components.ts'
+import { articleList, listPanel, pagination } from './components.ts'
 
 export const index: LayoutFn = (ctx) => {
   const current = ctx.pagination?.current ?? 1
@@ -17,5 +17,6 @@ export const index: LayoutFn = (ctx) => {
     </header>
     ${articleList(ctx, ctx.posts ?? [])}
     ${pagination(ctx)}`,
+    { panel: listPanel(ctx, ctx.posts ?? []) },
   )
 }

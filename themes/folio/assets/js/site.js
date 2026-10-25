@@ -52,3 +52,36 @@ if (tocLinks.length > 0) {
 
   for (const heading of headingToLink.keys()) observer.observe(heading)
 }
+
+const rail = document.getElementById('rail')
+const menu = document.querySelector('[data-rail-toggle]')
+
+function setRail(open) {
+  if (!rail || !(menu instanceof HTMLButtonElement)) return
+  rail.toggleAttribute('data-open', open)
+  menu.setAttribute('aria-expanded', String(open))
+}
+
+menu?.addEventListener('click', () => setRail(!rail?.hasAttribute('data-open')))
+document.querySelector('[data-rail-close]')?.addEventListener('click', () => setRail(false))
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') setRail(false)
+})
+
+const progress = document.querySelector('[data-progress]')
+if (progress instanceof HTMLElement) {
+  let queued = false
+  const paint = () => {
+    queued = false
+    const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+    progress.style.setProperty('--p', Math.min(1, Math.max(0, window.scrollY / max)).toFixed(4))
+  }
+  const schedule = () => {
+    if (queued) return
+    queued = true
+    requestAnimationFrame(paint)
+  }
+  paint()
+  window.addEventListener('scroll', schedule, { passive: true })
+  window.addEventListener('resize', schedule)
+}

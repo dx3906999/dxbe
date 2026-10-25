@@ -1,6 +1,7 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { getScholarConfig } from '../config.ts'
 import { baseLayout } from './base.ts'
+import { tocModule } from './components.ts'
 
 export const page: LayoutFn = (ctx) => {
   const page = ctx.pageItem
@@ -27,12 +28,12 @@ export const page: LayoutFn = (ctx) => {
           </details>`
           : ''
       }
-      <div class="scholar-layout ${hasToc ? '' : 'no-toc'}">
-        ${hasToc ? html`<aside class="scholar-toc">${ctx.tocHtml}</aside>` : ''}
+      <div class="scholar-layout">
         <div class="scholar-body">
           ${page.html}
         </div>
       </div>
     </article>`,
+    { panel: tocModule(ctx) },
   )
 }

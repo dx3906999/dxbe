@@ -141,3 +141,64 @@ export function pageHeader(ctx: ThemeContext, extra?: { count?: number; countKey
     }
   </header>`
 }
+
+function counted(names: string[]): string[] {
+  const counts = new Map<string, number>()
+  for (const name of names) counts.set(name, (counts.get(name) ?? 0) + 1)
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name)
+}
+
+function panelModule(title: string, body: unknown) {
+  return html`<section class="scholar-module">
+    <h2 class="scholar-module-title">${title}</h2>
+    ${body}
+  </section>`
+}
+
+/** The article's contents for the side panel; empty without headings or when turned off. */
+export function tocModule(ctx: ThemeContext) {
+  if (!getScholarConfig(ctx).showToc || ctx.tocHtml.value.length === 0) return html``
+  return html`<section class="scholar-module scholar-toc">${ctx.tocHtml}</section>`
+}
+
+export function recentModule(ctx: ThemeContext, posts: Post[]) {
+  if (posts.length === 0) return html``
+  return panelModule(
+    ctx.i18n.t('home.latest'),
+    html`<ol class="scholar-recent">
+      ${posts.slice(0, 5).map(
+        (post) => html`<li>
+          <a href="${ctx.helpers.postUrl(post)}">${post.title}</a>
+          <time datetime="${post.date}">${ctx.helpers.date(post.date)}</time>
+        </li>`,
+      )}
+    </ol>`,
+  )
+}
+
+export function categoryModule(ctx: ThemeContext, posts: Post[]) {
+  const names = counted(posts.flatMap((post) => post.categories))
+  if (names.length === 0) return html``
+  return panelModule(
+    ctx.i18n.t('page.categories'),
+    html`<ul class="scholar-terms">
+      ${names.map((name) => html`<li><a href="${ctx.helpers.categoryUrlByName(name)}">${name}</a></li>`)}
+    </ul>`,
+  )
+}
+
+export function keywordModule(ctx: ThemeContext, names: string[]) {
+  if (names.length === 0) return html``
+  return panelModule(
+    ctx.i18n.t('page.keywords'),
+    html`<p class="scholar-module-keywords">${tagLinks(ctx, names)}</p>`,
+  )
+}
+
+/** Side panel for article lists: recent articles, then their categories and keywords. */
+export function listPanel(ctx: ThemeContext, posts: Post[]) {
+  return html`${recentModule(ctx, posts)}${categoryModule(ctx, posts)}${keywordModule(
+    ctx,
+    counted(posts.flatMap((post) => post.tags)),
+  )}`
+}
