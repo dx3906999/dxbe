@@ -24,7 +24,7 @@ import { stripHtml } from '../shared/html.ts'
 import type { SiteConfig } from './config.ts'
 import type { TocEntry } from './types.ts'
 
-const PIPELINE_VERSION = '4'
+const PIPELINE_VERSION = '5'
 
 export interface MarkdownResult {
   html: string
@@ -40,6 +40,22 @@ export interface MarkdownRenderer {
 
 interface CachedResult extends MarkdownResult {}
 
+// KaTeX emits each formula twice (MathML with a TeX annotation, then HTML);
+// keep only the visible HTML half so `$\nabla$` reads as "∇", not "∇\nabla∇"
+function withoutMathml(node: Element): Element {
+  const children: ElementContent[] = []
+  for (const child of node.children) {
+    if (child.type !== 'element') {
+      children.push(child)
+      continue
+    }
+    const className = child.properties?.className
+    if (Array.isArray(className) && className.includes('katex-mathml')) continue
+    children.push(withoutMathml(child))
+  }
+  return { ...node, children }
+}
+
 function collectToc() {
   return (tree: HastRoot, file: { data: Record<string, unknown> }) => {
     const toc: TocEntry[] = []
@@ -50,7 +66,7 @@ function collectToc() {
       toc.push({
         depth: Number(node.tagName.slice(1)),
         id,
-        text: toText(node).trim(),
+        text: toText(withoutMathml(node)).trim(),
       })
     })
     file.data.toc = toc
