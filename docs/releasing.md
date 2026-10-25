@@ -8,7 +8,7 @@
 2. 换成新版本的 tarball：
 
    ```bash
-   npm install https://github.com/dx3906999/dxbe/releases/download/v0.8.0/dxbe-0.8.0.tgz
+   npm install https://github.com/dx3906999/dxbe/releases/download/v0.8.1/dxbe-0.8.1.tgz
    ```
 
    `package.json` 和 `package-lock.json` 都会变，两个都要提交。

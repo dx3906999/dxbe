@@ -1527,6 +1527,12 @@ a.ap-btn--hot:hover {
   background-size: 12px 12px;
 }
 
+/* KaTeX's numbered-equation column hangs 2px past the edge (.vlist-t2 has
+   margin-right: -2px); under overflow-x: auto that is a scrollbar per equation */
+.katex-display .tag .vlist-t2 {
+  margin-right: 0;
+}
+
 .ap-article__foot {
   margin-top: 56px;
   display: grid;

@@ -264,7 +264,10 @@ export async function copyUnlockAsset(outDir: string): Promise<void> {
 export async function copyKatexAssets(outDir: string, base: string): Promise<string> {
   let cssPath: string
   try {
-    cssPath = require.resolve('katex/dist/katex.min.css')
+    // the stylesheet must match the KaTeX that renders the markup, i.e. the copy
+    // rehype-katex resolves; class names change between minors (.tag -> .katex-tag)
+    const katexRequire = createRequire(require.resolve('rehype-katex'))
+    cssPath = katexRequire.resolve('katex/dist/katex.min.css')
   } catch (error) {
     throw new BuildError('KaTeX CSS not found; run npm install', {
       code: 'THEME',
