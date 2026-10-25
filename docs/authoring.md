@@ -45,6 +45,36 @@ content/zh/posts/my-paper/
 - 放在 `public/` 里的 PDF 用站点路径引用（`![简历](/files/cv.pdf)`），项目页部署时会自动加 `base`。
 - `dxbe check:links` 会检查嵌入的 PDF 是否存在。GitHub Pages 单个文件上限 100 MB，大文件更适合放 Release 附件再写外链。
 
+## 加密文章
+
+在 frontmatter 里写一个密码名：
+
+```yaml
+---
+title: 日记
+date: 2026-10-25T12:00:00+08:00
+slug: diary-2026-10
+encrypt: diary
+summary: 可选，公开显示的摘要
+---
+```
+
+密码写在博客根目录的 `passwords.yml`，一个名字对应一个密码，同名的文章共用：
+
+```yaml
+diary: 一个足够长的密码
+family: 另一个密码
+```
+
+也可以用环境变量 `DXBE_PASSWORD_DIARY`（名字转大写，`-` 换成 `_`），它优先于文件。找不到密码时构建失败，不会把明文发布出去。
+
+- 正文在构建时用 AES-256-GCM 加密（密钥由 PBKDF2-SHA256、60 万次迭代从密码派生），页面里只有密文，密码不会出现在任何输出文件里。读者输入密码后在浏览器里解密，同一个标签页里同名的文章只需输入一次。
+- 标题、日期、标签、分类和 `summary` 仍然公开，会出现在列表、feed、sitemap 和搜索里。不写 `summary` 时显示固定的"这篇文章已加密"，不会截取正文。目录、正文搜索和 feed 正文都不包含加密内容。
+- `passwords.yml` 已被 `dxbe setup` 加进 `.gitignore`，不要提交它。
+- **博客源码仓库必须是私有的。** 公开仓库里的 Markdown 就是明文，加密只保护发布出去的页面。用 `dxbe deploy` 可以让源码留在私有仓库，只把构建结果推到公开的 Pages 仓库，见 [deployment.md](deployment.md#一条命令部署dxbe-deploy)。
+- 密文是公开的，任何人都可以离线反复猜密码。密码要足够长，不要用生日、短单词这类容易猜的。
+- 解锁需要 JavaScript 和 HTTPS（本地开发的 localhost 也可以）。加密文章里的链接不在 `dxbe check:links` 的检查范围内。
+
 ## Frontmatter
 
 ```yaml

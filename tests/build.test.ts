@@ -39,7 +39,7 @@ describe('site build', () => {
   })
 
   it('renders a post with math, search metadata, and anchors', async () => {
-    const post = result.tasks.find((task) => task.kind === 'post')
+    const post = result.tasks.find((task) => task.kind === 'post' && task.post?.hasMath)
     expect(post).toBeDefined()
     const html = await readFile(path.join(root, outDir, post?.outFile ?? ''), 'utf8')
     expect(html).toContain('data-pagefind-body')
@@ -100,6 +100,22 @@ describe('site build', () => {
     await expect(access(path.join(post, 'type-specimen.pdf'))).resolves.toBeUndefined()
     const html = await readFile(path.join(post, 'index.html'), 'utf8')
     expect(html).toContain('<object class="pdf-embed__frame" data="type-specimen.pdf"')
+  })
+
+  it('publishes encrypted posts as ciphertext behind a password form', async () => {
+    const post = path.join(root, outDir, 'posts', 'encrypted-notes', 'index.html')
+    const html = await readFile(post, 'utf8')
+    expect(html).toContain('data-dxbe-locked="demo"')
+    expect(html).toContain('dxbe-locked__payload')
+    // neither the body, its headings, nor the password reach the output
+    expect(html).not.toContain('解锁成功')
+    expect(html).not.toContain('哪些内容不加密')
+    expect(html).not.toContain('dxbe-demo"')
+    expect(html).not.toContain('class="toc"')
+    await expect(access(path.join(root, outDir, 'assets', 'unlock.js'))).resolves.toBeUndefined()
+    const atom = await readFile(path.join(root, outDir, 'atom.xml'), 'utf8')
+    const entry = atom.slice(atom.indexOf('/posts/encrypted-notes/'))
+    expect(entry.slice(0, entry.indexOf('</entry>'))).not.toContain('<content')
   })
 
   it('gives feed entries a base so relative asset links resolve', async () => {

@@ -12,6 +12,8 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 - 五套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术）、`apogee`（NASA punk）、`capstan`（磁带未来主义）
 - 站点身份、语言、导航、域名、许可证、主题全部在 `site.config.ts`
 - Markdown + YAML frontmatter，构建时渲染，客户端零框架
+- 加密文章：frontmatter 写 `encrypt: <密码名>`，正文在构建时用 AES-256-GCM 加密，读者输入密码后在浏览器里解密
+- `dxbe deploy` 一条命令构建并推送到 GitHub Pages 仓库，源码仓库可以私有；也可以用 GitHub Actions 部署
 - 文章目录里的图片、PDF 等附件随文章发布；单独一行的 `![标题](paper.pdf)` 渲染成内嵌 PDF 阅读器 + 链接
 - 标签、分类、归档、分页、Atom、sitemap、robots、404、SEO/OG、JSON-LD
 - 可选的个人主页布局：首页放简介或简历，文章列表移到 `/posts/`；可选的发表（publications）页，五套主题都有对应布局
@@ -22,18 +24,18 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 
 ## 快速开始
 
-需要 Node.js 24 或更高版本。下面的命令安装 v0.6.1 发布版；apogee / capstan 主题、个人主页、分类、发表页和 PDF 嵌入都从 0.6.0 开始提供。
+需要 Node.js 24 或更高版本。下面的命令安装 v0.7.0 发布版；加密文章和 `dxbe deploy` 从 0.7.0 开始提供，apogee / capstan 主题、个人主页、分类、发表页和 PDF 嵌入从 0.6.0 开始。
 
 ```bash
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.6.1/dxbe-0.6.1.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.7.0/dxbe-0.7.0.tgz
 npx dxbe setup
 npx dxbe dev
 ```
 
-发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.6.1`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
+发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.7.0`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
 
 `setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。它同时把仓库补成能直接构建和部署的样子：`package.json` 设为 `"type": "module"`（`npm init -y` 默认是 `commonjs`，配置文件会加载失败）并补上 `dev`、`build`、`check` 等脚本，生成 `.nvmrc`（部署工作流从这里读 Node 版本）和 `.gitignore`。已有的脚本和文件不会被覆盖。非交互使用：
 
@@ -89,6 +91,7 @@ package.json
 | `dxbe check:theme` | 用当前内容构建全部内置主题 |
 | `dxbe clean` | 删除 `dist/`、缓存和开发产物 |
 | `dxbe setup` | 交互式生成或更新 `site.config.ts` |
+| `dxbe deploy` | 生产构建、检查，并把 `dist/` 推到 `deploy.repo`（`--dry-run` 只提交不推送） |
 | `dxbe smoke` | 部署后冒烟测试，需要 `BASE_URL` |
 
 生产预览：
@@ -135,6 +138,7 @@ site.config.ts + content/
 - `pagination.perPage`：每页文章数
 - `features.search` / `features.math`：搜索和公式
 - `features.publications`：开启后 `pages/publications.md` 发布在 `/publications/`
+- `deploy.repo` / `deploy.branch`：`dxbe deploy` 推送的网站仓库和分支
 - `markdown.allowHtml`：允许正文里的原始 HTML（经过 sanitize），默认关闭；`markdown.shiki`：代码高亮的明暗主题
 - `features.autoLanguage`：首页按浏览器语言跳转，默认开启；深链接不跳转，手动选择会记住
 
@@ -191,6 +195,10 @@ PDF 放进文章目录，单独一行写图片语法：
 
 构建结果是内嵌阅读器加一行标题链接。多数手机浏览器不能内嵌 PDF，会直接显示链接；打印时只留链接。写在句子中间的 `![论文](paper.pdf)` 只生成普通链接。`public/` 里的 PDF 用站点路径（`/files/cv.pdf`）引用，项目页部署会自动加 `base`；`dxbe check:links` 会检查 PDF 是否存在。发表页的 `links` 也可以指向站内 PDF。
 
+### 加密文章
+
+frontmatter 写 `encrypt: diary`，在博客根目录的 `passwords.yml`（已被 setup 加进 `.gitignore`）里写 `diary: 密码`。页面里只有密文，标题、日期、标签和 `summary` 仍然公开。公开仓库里的 Markdown 是明文，所以用加密文章时源码仓库要私有，用 `dxbe deploy` 发布。
+
 详细说明见 [docs/authoring.md](docs/authoring.md)。
 
 ## 主题
@@ -213,6 +221,8 @@ npx dxbe dev --theme=scholar
 主题目录包含 `theme.json`、`theme.ts`、`layouts/`、`assets/`、`i18n/`。自定义主题放在博客仓库的 `themes/<name>/`，同名主题会覆盖内置主题；外部主题从 `dxbe/theme` 导入公共 API。接口说明见 [docs/theming.md](docs/theming.md)，截图见 [docs/theme-gallery.md](docs/theme-gallery.md)。
 
 ## 部署到 GitHub Pages
+
+有两种方式。源码仓库私有、或者想像 `hexo deploy` 一样一条命令发布时，用 `dxbe deploy`，见 [docs/deployment.md](docs/deployment.md#一条命令部署dxbe-deploy)。下面是用 GitHub Actions 的方式。
 
 引擎仓库不部署自身。部署工作流是 `templates/deploy.yml`，复制到博客仓库后使用。完整的部署链路在 [dxbe-e2e](https://github.com/dx3906999/dxbe-e2e) 上持续验证，线上地址是 [dx3906999.github.io/dxbe-e2e](https://dx3906999.github.io/dxbe-e2e/)。
 

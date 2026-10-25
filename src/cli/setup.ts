@@ -75,6 +75,9 @@ const GITIGNORE = [
   '.theme-check/',
   '.determinism/',
   'site.config.ts.bak',
+  // passwords for encrypted posts, and the working clone dxbe deploy pushes from
+  'passwords.yml',
+  '.deploy-git/',
 ]
 
 /**

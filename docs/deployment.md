@@ -1,6 +1,6 @@
 # 部署博客实例
 
-目标平台是 GitHub Pages。构建和部署都在博客仓库的 GitHub Actions 里完成，不提交 `dist/`。
+目标平台是 GitHub Pages。有两种部署方式：博客仓库公开时用 GitHub Actions（下面的“首次部署”），或者用 `dxbe deploy` 在本地构建后推送到网站仓库（源码可以私有）。两种方式都不提交 `dist/`。
 
 构建系统仓库（`dxbe`）本身不部署。部署工作流放在 `templates/deploy.yml`，由博客仓库复制到 `.github/workflows/deploy.yml`。
 
@@ -26,6 +26,42 @@ actions/upload-pages-artifact
 actions/deploy-pages
 npx --no-install dxbe smoke
 ```
+
+## 一条命令部署：dxbe deploy
+
+和 `hexo deploy` 一样：在本地构建，再把 `dist/` 推到一个专门放网站的仓库或分支。不需要 GitHub Actions，博客源码仓库可以是私有的（加密文章需要这样，见 [authoring.md](authoring.md#加密文章)）。
+
+1. 在 GitHub 新建一个公开仓库放网站。用 `<user>.github.io` 作为仓库名，网址就是 `https://<user>.github.io/`。
+2. 在 `site.config.ts` 里加部署目标：
+
+   ```ts
+   site: {
+     url: 'https://<user>.github.io',
+     base: '/',
+   },
+   deploy: {
+     repo: 'git@github.com:<user>/<user>.github.io.git',
+     branch: 'main',
+   },
+   ```
+
+   `branch` 默认是 `gh-pages`；`message` 可选，默认 `Site updated: {date}`。
+3. 运行：
+
+   ```bash
+   npx dxbe deploy
+   ```
+
+   它会以生产模式构建，跑链接和 SEO 检查，建搜索索引，然后把 `dist/` 提交到 `.deploy-git/`（目标分支的本地副本），再普通推送（不强推，保留网站分支的历史）。输出没有变化时不会提交。
+4. 第一次部署后，在网站仓库的 Settings → Pages → Build and deployment 里选择 **Deploy from a branch**，分支选上面配置的 `branch`，目录选 `/ (root)`。
+
+注意：
+
+- 推送用的是本机的 git 和凭据，需要能 `git push` 到网站仓库。
+- 没有 `actions/configure-pages`，不会自动注入地址。网站在子路径（例如推到 `blog` 仓库的 `gh-pages`，网址是 `https://<user>.github.io/blog/`）时，要自己写 `site.base: '/blog/'`。
+- 目标分支里如果有 `site.config.ts`，说明它是源码分支，`dxbe deploy` 会拒绝推送，避免用构建结果覆盖源码。
+- `npx dxbe deploy --dry-run` 只构建并在 `.deploy-git/` 里提交，不推送；`--skip-build` 跳过构建和检查，直接发布现有的 `dist/`。
+- 用了 `dxbe deploy` 就不需要 `.github/workflows/deploy.yml`，两种方式选一种。
 
 ## 项目页与用户页
 

@@ -1063,3 +1063,74 @@ html[data-theme="dark"] .shiki span {
   font-size: 0.86rem;
   text-align: center;
 }
+
+/* encrypted post: the password form shown until unlock.js swaps in the content */
+
+.dxbe-locked {
+  margin: 2rem 0;
+  padding: 1.6rem 1.4rem;
+  border: 1px solid var(--rule);
+  background: var(--wash);
+}
+
+.dxbe-locked__title {
+  margin: 0 0 0.3rem;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.dxbe-locked__hint {
+  margin: 0 0 1rem;
+  color: var(--dim);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.dxbe-locked__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.dxbe-locked__input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.dxbe-locked__input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.dxbe-locked__button {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dxbe-locked__button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.dxbe-locked__error {
+  margin: 0.7rem 0 0;
+  color: var(--accent);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}

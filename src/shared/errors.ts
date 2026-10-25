@@ -1,4 +1,4 @@
-export type ErrorCode = 'CONFIG' | 'CONTENT' | 'MARKDOWN' | 'THEME' | 'OUTPUT' | 'USAGE'
+export type ErrorCode = 'CONFIG' | 'CONTENT' | 'MARKDOWN' | 'THEME' | 'OUTPUT' | 'USAGE' | 'DEPLOY'
 
 export interface BuildErrorOptions {
   code: ErrorCode

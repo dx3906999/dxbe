@@ -162,36 +162,43 @@ if (bar || gaugeFill || tocLinks.length > 0) {
 
 const copyLabel = document.documentElement.lang.startsWith('zh') ? ['复制', '已复制'] : ['COPY', 'DONE']
 
-for (const pre of document.querySelectorAll('.ap-prose pre')) {
-  const code = pre.querySelector('code')
-  const lang =
-    pre.dataset.language ||
-    [...(code?.classList ?? [])].find((name) => name.startsWith('language-'))?.slice(9) ||
-    'text'
-  const lines = pre.querySelectorAll('.line').length || (code?.textContent ?? '').split('\n').length
-  const frame = document.createElement('div')
-  frame.className = 'ap-code'
-  const head = document.createElement('div')
-  head.className = 'ap-code__bar'
-  head.innerHTML = '<span class="ap-code__lang"></span><span class="ap-code__lines"></span><button class="ap-code__copy" type="button"></button>'
-  head.querySelector('.ap-code__lang').textContent = lang
-  head.querySelector('.ap-code__lines').textContent = `${String(lines).padStart(3, '0')} LN`
-  const button = head.querySelector('.ap-code__copy')
-  button.textContent = copyLabel[0]
-  button.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(code?.innerText ?? pre.innerText)
-      button.textContent = copyLabel[1]
-      button.setAttribute('data-done', '')
-      setTimeout(() => {
-        button.textContent = copyLabel[0]
-        button.removeAttribute('data-done')
-      }, 1400)
-    } catch {}
-  })
-  pre.replaceWith(frame)
-  frame.append(head, pre)
+// idempotent: encrypted posts insert their content after this script ran
+function decorateCode() {
+  for (const pre of document.querySelectorAll('.ap-prose pre')) {
+    if (pre.closest('.ap-code')) continue
+    const code = pre.querySelector('code')
+    const lang =
+      pre.dataset.language ||
+      [...(code?.classList ?? [])].find((name) => name.startsWith('language-'))?.slice(9) ||
+      'text'
+    const lines = pre.querySelectorAll('.line').length || (code?.textContent ?? '').split('\n').length
+    const frame = document.createElement('div')
+    frame.className = 'ap-code'
+    const head = document.createElement('div')
+    head.className = 'ap-code__bar'
+    head.innerHTML = '<span class="ap-code__lang"></span><span class="ap-code__lines"></span><button class="ap-code__copy" type="button"></button>'
+    head.querySelector('.ap-code__lang').textContent = lang
+    head.querySelector('.ap-code__lines').textContent = `${String(lines).padStart(3, '0')} LN`
+    const button = head.querySelector('.ap-code__copy')
+    button.textContent = copyLabel[0]
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(code?.innerText ?? pre.innerText)
+        button.textContent = copyLabel[1]
+        button.setAttribute('data-done', '')
+        setTimeout(() => {
+          button.textContent = copyLabel[0]
+          button.removeAttribute('data-done')
+        }, 1400)
+      } catch {}
+    })
+    pre.replaceWith(frame)
+    frame.append(head, pre)
+  }
 }
+
+decorateCode()
+document.addEventListener('dxbe:unlocked', decorateCode)
 
 /* ---------- reveal on enter ---------- */
 

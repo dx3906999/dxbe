@@ -29,7 +29,7 @@ export const post: LayoutFn = (ctx) => {
           </details>`
           : ''
       }
-      <div class="post-layout">
+      <div class="post-layout${hasToc ? '' : ' no-toc'}">
         <div class="post-body">
           ${post.html}
         </div>

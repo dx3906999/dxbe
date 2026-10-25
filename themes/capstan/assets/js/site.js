@@ -48,34 +48,41 @@ document.addEventListener('keydown', (event) => {
 
 const copyLabel = zh ? ['复制', '已复制'] : ['COPY', 'DONE']
 
-for (const pre of document.querySelectorAll('.cp-prose pre')) {
-  const code = pre.querySelector('code')
-  const lang =
-    pre.dataset.language ||
-    [...(code?.classList ?? [])].find((name) => name.startsWith('language-'))?.slice(9) ||
-    'text'
-  const lines = pre.querySelectorAll('.line').length || (code?.textContent ?? '').split('\n').length
-  const frame = document.createElement('figure')
-  frame.className = 'cp-code'
-  frame.innerHTML = `<figcaption class="cp-code__bar"><span class="cp-engrave cp-code__lang"></span><span class="cp-engrave cp-code__lines"></span><button class="cp-code__copy" type="button"></button></figcaption><div class="cp-crt"><div class="cp-crt__glass"></div></div>`
-  frame.querySelector('.cp-code__lang').textContent = lang
-  frame.querySelector('.cp-code__lines').textContent = `${String(lines).padStart(3, '0')} LN`
-  const button = frame.querySelector('.cp-code__copy')
-  button.textContent = copyLabel[0]
-  button.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(code?.innerText ?? pre.innerText)
-      button.textContent = copyLabel[1]
-      button.setAttribute('data-done', '')
-      setTimeout(() => {
-        button.textContent = copyLabel[0]
-        button.removeAttribute('data-done')
-      }, 1400)
-    } catch {}
-  })
-  pre.replaceWith(frame)
-  frame.querySelector('.cp-crt__glass').append(pre)
+// idempotent: encrypted posts insert their content after this script ran
+function decorateCode() {
+  for (const pre of document.querySelectorAll('.cp-prose pre')) {
+    if (pre.closest('.cp-code')) continue
+    const code = pre.querySelector('code')
+    const lang =
+      pre.dataset.language ||
+      [...(code?.classList ?? [])].find((name) => name.startsWith('language-'))?.slice(9) ||
+      'text'
+    const lines = pre.querySelectorAll('.line').length || (code?.textContent ?? '').split('\n').length
+    const frame = document.createElement('figure')
+    frame.className = 'cp-code'
+    frame.innerHTML = `<figcaption class="cp-code__bar"><span class="cp-engrave cp-code__lang"></span><span class="cp-engrave cp-code__lines"></span><button class="cp-code__copy" type="button"></button></figcaption><div class="cp-crt"><div class="cp-crt__glass"></div></div>`
+    frame.querySelector('.cp-code__lang').textContent = lang
+    frame.querySelector('.cp-code__lines').textContent = `${String(lines).padStart(3, '0')} LN`
+    const button = frame.querySelector('.cp-code__copy')
+    button.textContent = copyLabel[0]
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(code?.innerText ?? pre.innerText)
+        button.textContent = copyLabel[1]
+        button.setAttribute('data-done', '')
+        setTimeout(() => {
+          button.textContent = copyLabel[0]
+          button.removeAttribute('data-done')
+        }, 1400)
+      } catch {}
+    })
+    pre.replaceWith(frame)
+    frame.querySelector('.cp-crt__glass').append(pre)
+  }
 }
+
+decorateCode()
+document.addEventListener('dxbe:unlocked', decorateCode)
 
 /* ---------- transport: rollers, counter, level, index ---------- */
 

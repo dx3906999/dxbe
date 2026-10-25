@@ -107,6 +107,16 @@ const homeSchema = z
   .strict()
   .default({ layout: 'posts', page: 'home' })
 
+const deploySchema = z
+  .object({
+    /** Git URL of the repository that serves the built site, e.g. <user>.github.io. */
+    repo: z.string().min(1),
+    branch: z.string().min(1).default('gh-pages'),
+    /** Commit message; {date} becomes the ISO timestamp. */
+    message: z.string().min(1).default('Site updated: {date}'),
+  })
+  .strict()
+
 const paginationSchema = z
   .object({
     perPage: z.number().int().positive().default(10),
@@ -160,6 +170,8 @@ export const siteConfigSchema = z
     pagination: paginationSchema,
     features: featuresSchema,
     markdown: markdownSchema,
+    /** Target for `dxbe deploy`, which pushes dist/ instead of relying on Actions. */
+    deploy: deploySchema.optional(),
   })
   .strict()
 

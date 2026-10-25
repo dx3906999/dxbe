@@ -7,7 +7,15 @@ import { parseDate, yearOf } from '../shared/date.ts'
 import { BuildError } from '../shared/errors.ts'
 import { raw } from '../shared/html.ts'
 import { categoryPath, pagePath, postPath, tagPath } from '../shared/url.ts'
+import { unlockScriptUrl } from '../theme/loader.ts'
 import type { LoadedConfig } from './config.ts'
+import {
+  encryptHtml,
+  loadPasswords,
+  lockedHtml,
+  lockedSummary,
+  missingPasswordHint,
+} from './encrypt.ts'
 import { createMarkdownRenderer } from './markdown.ts'
 import type {
   Alternate,
@@ -36,8 +44,18 @@ const frontmatterSchema = z
     summary: z.string().optional(),
     description: z.string().optional(),
     draft: z.boolean().default(false),
+    /** Name of a password in passwords.yml; the body is published encrypted. */
+    encrypt: z
+      .string()
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must be a password name like "diary"')
+      .optional(),
   })
   .strict()
+
+export interface Encryption {
+  password: (name: string) => string | undefined
+  scriptUrl: string
+}
 
 const publicationSchema = z
   .object({
@@ -276,6 +294,7 @@ async function buildPost(
     excerpt: string
     readingMinutes: number
   }>,
+  encryption: Encryption,
 ): Promise<Post | undefined> {
   const relativeFile = path.relative(loaded.root, entry.file).split(path.sep).join('/')
   const source = await readFile(entry.file, 'utf8')
@@ -307,6 +326,25 @@ async function buildPost(
   const rendered = await render(parsed.body, relativeFile)
   const assetFiles = entry.assetDir ? await listAssets(entry.assetDir) : []
 
+  let html = rendered.html
+  let toc = rendered.toc
+  let summary = frontmatter.summary?.trim() || rendered.excerpt
+  if (frontmatter.encrypt) {
+    const password = encryption.password(frontmatter.encrypt)
+    if (!password) {
+      throw new BuildError(`No password named "${frontmatter.encrypt}"`, {
+        code: 'CONTENT',
+        file: relativeFile,
+        hint: missingPasswordHint(frontmatter.encrypt),
+      })
+    }
+    const payload = encryptHtml(html, password, `${lang}/${slug}/${frontmatter.encrypt}`)
+    html = lockedHtml(payload, frontmatter.encrypt, lang, encryption.scriptUrl)
+    // headings and the first paragraph would leak through the TOC and the excerpt
+    toc = []
+    summary = frontmatter.summary?.trim() || lockedSummary(lang)
+  }
+
   return {
     lang,
     slug,
@@ -317,11 +355,12 @@ async function buildPost(
     updated: frontmatter.updated,
     tags: [...new Set(frontmatter.tags.map((tag) => tag.trim()).filter(Boolean))],
     categories: [...new Set(frontmatter.categories.map((name) => name.trim()).filter(Boolean))],
-    summary: frontmatter.summary?.trim() || rendered.excerpt,
+    summary,
     draft: frontmatter.draft,
+    encrypted: Boolean(frontmatter.encrypt),
     url: postPath(lang, loaded.config.locales.default, slug),
-    html: raw(rendered.html),
-    toc: rendered.toc,
+    html: raw(html),
+    toc,
     hasMath: rendered.hasMath,
     readingMinutes: rendered.readingMinutes,
     alternates: [],
@@ -527,6 +566,10 @@ function buildArchives(posts: Post[], timeZone: string): ArchiveGroup[] {
 export async function scanContent(loaded: LoadedConfig, options: ScanOptions): Promise<ContentSet> {
   const renderer = createMarkdownRenderer(loaded.config, loaded.root)
   const render = (source: string, file: string) => renderer.render(source, file)
+  const encryption: Encryption = {
+    password: await loadPasswords(loaded.root),
+    scriptUrl: unlockScriptUrl(loaded.base),
+  }
   const languages = Object.keys(loaded.config.locales.entries)
   const postsByLang: Record<string, Post[]> = {}
   const pagesByLang: Record<string, PageItem[]> = {}
@@ -539,7 +582,9 @@ export async function scanContent(loaded: LoadedConfig, options: ScanOptions): P
     const pageEntries = await listMarkdownEntries(pagesDir)
 
     const posts = (
-      await Promise.all(postEntries.map((entry) => buildPost(loaded, lang, entry, options, render)))
+      await Promise.all(
+        postEntries.map((entry) => buildPost(loaded, lang, entry, options, render, encryption)),
+      )
     ).filter((post): post is Post => post !== undefined)
     const pages = (
       await Promise.all(pageEntries.map((entry) => buildPage(loaded, lang, entry, options, render)))

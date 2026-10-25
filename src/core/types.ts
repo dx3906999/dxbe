@@ -44,6 +44,8 @@ export interface Post {
   categories: string[]
   summary: string
   draft: boolean
+  /** The body is ciphertext behind a password form; themes may mark it in lists. */
+  encrypted: boolean
   url: string
   html: SafeHtml
   toc: TocEntry[]
