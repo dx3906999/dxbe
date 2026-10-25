@@ -108,7 +108,7 @@ export function postCard(ctx: ThemeContext, post: Post, index: number): SafeHtml
       <span class="ap-card__no"><span class="ap-label__key">LOG</span> ${missionCode(ctx, post.date)}</span>
       <time datetime="${post.date}">${stamp(ctx, post.date)}</time>
     </div>
-    ${cover ? html`<div class="ap-card__cover" aria-hidden="true"><img src="${ctx.helpers.url(cover.url)}" alt="" loading="lazy" decoding="async"></div>` : ''}
+    ${cover ? html`<div class="ap-card__cover" aria-hidden="true" style="--cover:url('${ctx.helpers.url(cover.url)}')"><img src="${ctx.helpers.url(cover.url)}" alt="" loading="lazy" decoding="async"></div>` : ''}
     <div class="ap-card__body">
       <h2 class="ap-card__title"><a href="${ctx.helpers.postUrl(post)}">${post.title}</a></h2>
       ${post.summary ? html`<p class="ap-card__sum">${post.summary}</p>` : ''}
