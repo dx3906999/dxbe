@@ -2,15 +2,17 @@ import { access, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { type BuildResult, buildSite } from '../src/core/build.ts'
-import { loadConfig } from '../src/core/config.ts'
+import { type LoadedConfig, loadConfig } from '../src/core/config.ts'
 import { Logger } from '../src/shared/logger.ts'
+import { absoluteUrl } from '../src/shared/url.ts'
 
 const root = process.cwd()
 const outDir = '.test-dist'
+let loaded: LoadedConfig
 let result: BuildResult
 
 beforeAll(async () => {
-  const loaded = await loadConfig({ root, production: false })
+  loaded = await loadConfig({ root, production: false })
   result = await buildSite(loaded, {
     outDir,
     atomic: false,
@@ -65,7 +67,9 @@ describe('site build', () => {
     expect(list?.kind).toBe('index')
     expect(list?.posts?.length).toBeGreaterThan(0)
     const html = await readFile(path.join(root, outDir, 'posts', 'index.html'), 'utf8')
-    expect(html).toContain('<link rel="canonical" href="http://localhost:4000/posts/">')
+    // CI overrides SITE_URL, so derive the expected origin from the loaded config
+    const canonical = absoluteUrl(loaded.url, loaded.base, '/posts/')
+    expect(html).toContain(`<link rel="canonical" href="${canonical}">`)
   })
 
   it('builds category pages from post frontmatter', async () => {
