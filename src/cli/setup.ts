@@ -1,4 +1,4 @@
-import { access, copyFile, writeFile } from 'node:fs/promises'
+import { access, appendFile, copyFile, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { stdin as input, stdout as output } from 'node:process'
 import { createInterface } from 'node:readline/promises'
@@ -52,6 +52,86 @@ async function exists(file: string): Promise<boolean> {
   } catch {
     return false
   }
+}
+
+const SCRIPTS: Record<string, string> = {
+  dev: 'dxbe dev',
+  build: 'dxbe build',
+  check: 'dxbe check',
+  preview: 'dxbe preview',
+  new: 'dxbe new',
+  index: 'dxbe index',
+  clean: 'dxbe clean',
+}
+
+const NODE_VERSION = '24'
+
+const GITIGNORE = [
+  'node_modules/',
+  'dist/',
+  '.dev-dist/',
+  '.build-tmp/',
+  '.cache/',
+  '.theme-check/',
+  '.determinism/',
+  'site.config.ts.bak',
+]
+
+/**
+ * Make the rest of a fresh blog repository work with the generated config:
+ * site.config.ts uses `import`, so package.json must be an ES module (npm init
+ * writes "commonjs"); deploy.yml reads the Node version from .nvmrc. Existing
+ * scripts and files are left as they are.
+ */
+async function prepareProject(root: string): Promise<string[]> {
+  const changes: string[] = []
+
+  const packageFile = path.join(root, 'package.json')
+  if (await exists(packageFile)) {
+    const source = await readFile(packageFile, 'utf8')
+    const pkg = JSON.parse(source) as { type?: string; scripts?: Record<string, string> }
+    let changed = false
+    if (pkg.type !== 'module') {
+      pkg.type = 'module'
+      changes.push('package.json: set "type": "module"')
+      changed = true
+    }
+    const scripts = { ...(pkg.scripts ?? {}) }
+    const added = Object.keys(SCRIPTS).filter((name) => {
+      if (scripts[name] !== undefined) return false
+      scripts[name] = SCRIPTS[name] as string
+      return true
+    })
+    if (added.length > 0) {
+      pkg.scripts = scripts
+      changes.push(`package.json: added scripts ${added.join(', ')}`)
+      changed = true
+    }
+    if (changed) {
+      const indent = source.match(/^[ \t]+(?=")/m)?.[0] ?? '  '
+      await writeFile(packageFile, `${JSON.stringify(pkg, null, indent)}\n`, 'utf8')
+    }
+  } else {
+    changes.push('package.json not found; run npm init and npm install dxbe first')
+  }
+
+  const nvmrc = path.join(root, '.nvmrc')
+  if (!(await exists(nvmrc))) {
+    await writeFile(nvmrc, `${NODE_VERSION}\n`, 'utf8')
+    changes.push(`.nvmrc: Node ${NODE_VERSION} (read by the deploy workflow)`)
+  }
+
+  const gitignore = path.join(root, '.gitignore')
+  const current = (await exists(gitignore)) ? await readFile(gitignore, 'utf8') : undefined
+  const lines = new Set((current ?? '').split(/\r?\n/).map((line) => line.trim()))
+  const missing = GITIGNORE.filter((entry) => !lines.has(entry))
+  if (missing.length > 0) {
+    const prefix = current && !current.endsWith('\n') ? '\n' : ''
+    await appendFile(gitignore, `${prefix}${missing.join('\n')}\n`, 'utf8')
+    changes.push(`.gitignore: ${current === undefined ? 'created' : `added ${missing.join(', ')}`}`)
+  }
+
+  return changes
 }
 
 function buildConfig(answers: Answers): string {
@@ -231,5 +311,6 @@ export async function runSetup(argv: string[] = process.argv.slice(2)): Promise<
   console.log(
     `wrote ${configExists ? 'site.config.ts (backup: site.config.ts.bak)' : 'site.config.ts'}`,
   )
+  for (const change of await prepareProject(process.cwd())) console.log(change)
   console.log('next: npm run dev')
 }
