@@ -1,314 +1,238 @@
+<div align="center">
+
 # dxbe
 
-dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内容，构建时生成纯静态 HTML；默认中文发布在 `/`，英文发布在 `/en/`；主题、站点身份和部署方式都由配置决定。
+**一个为个人博客写的静态站点生成器**
 
-这个仓库是 dxbe 引擎本身，不是个人博客。`content/`、`site.config.ts` 和主题截图用于演示与测试。实际博客仓库只安装 `dxbe`，保留内容、配置、`public/` 和一条部署工作流；引擎仓库只跑 CI，不部署站点。
+Markdown 写作，构建出纯静态 HTML；中英双语、五套完整主题、全文搜索，一条命令发布到 GitHub Pages。
 
-![folio 主题首页](docs/screenshots/folio-home.png)
+[![CI](https://github.com/dx3906999/dxbe/actions/workflows/ci.yml/badge.svg)](https://github.com/dx3906999/dxbe/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/dx3906999/dxbe?label=release)](https://github.com/dx3906999/dxbe/releases/latest)
+[![Node](https://img.shields.io/badge/node-%3E%3D24-339933)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+[快速开始](#快速开始) · [教程](docs/tutorial.md) · [主题](#主题) · [文档](#文档) · [更新记录](https://github.com/dx3906999/dxbe/releases)
+
+</div>
+
+![folio 主题的文章列表](docs/screenshots/folio-home.png)
+
+## 关于
+
+dxbe 是我给自己的博客写的工具，按自己的写作和发布习惯设计：内容是 Markdown，站点身份全在一个配置文件里，主题负责全部外观，部署只要一条命令。它不打算做成 Hexo、Hugo 那样的通用框架，没有插件系统，功能都是自己用到了才加。
+
+如果它刚好也合你的用法，欢迎直接拿去用。目前还在 0.x 阶段，次版本号之间可能有不兼容改动，升级前看一下 [Release 说明](https://github.com/dx3906999/dxbe/releases)。有问题可以提 issue。
+
+这个仓库是引擎本身，不是博客。仓库里的 `content/` 和 `site.config.ts` 只用来演示和测试；真正的博客放在单独的仓库里，把 dxbe 当依赖安装。
 
 ## 特性
 
-- 中文在 `/`，英文在 `/en/`，不生成 `/zh/`；首页可按浏览器语言选择入口，手动切换后记住选择
-- 五套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术）、`apogee`（NASA punk）、`capstan`（磁带未来主义）
-- 站点身份、语言、导航、域名、许可证、主题全部在 `site.config.ts`
-- Markdown + YAML frontmatter，构建时渲染，客户端零框架
-- 文章封面：frontmatter 写 `cover: cover.jpg`，列表里图文并排、文章页顶部大图，同时作为分享预览图
-- 加密文章：frontmatter 写 `encrypt: <密码名>`，正文在构建时用 AES-256-GCM 加密，读者输入密码后在浏览器里解密
-- `dxbe deploy` 一条命令构建并推送到 GitHub Pages 仓库，源码仓库可以私有；也可以用 GitHub Actions 部署
-- 文章目录里的图片、PDF 等附件随文章发布；单独一行的 `![标题](paper.pdf)` 渲染成内嵌 PDF 阅读器 + 链接
-- 标签、分类、归档、分页、Atom、sitemap、robots、404、SEO/OG、JSON-LD
-- 可选的个人主页布局：首页放简介或简历，文章列表移到 `/posts/`；可选的发表（publications）页，五套主题都有对应布局
-- Pagefind 全文搜索，按语言过滤，排除代码和公式
-- KaTeX 构建时渲染，仅数学页面加载 CSS
-- 确定性构建、内部链接检查、SEO 检查、主题一致性测试
-- 引擎仓库跑 Ubuntu + Windows CI；博客实例通过 GitHub Pages 部署，部署后自动 smoke test
+**写作**
+
+- Markdown + YAML frontmatter，代码高亮（Shiki）和公式（KaTeX）都在构建时完成，页面不加载渲染脚本
+- 文章封面：列表里图文并排，文章页顶部大图，同时作为分享预览图
+- 文章目录里的图片、PDF 随文章发布；单独一行的 `![标题](paper.pdf)` 渲染成内嵌阅读器
+- 加密文章：正文在构建时用 AES-256-GCM 加密，读者输入密码后在浏览器里解密
+- 可选的个人主页布局（首页放简介，文章列表移到 `/posts/`）和发表（publications）页
+
+**站点**
+
+- 中文在 `/`，英文在 `/en/`；首页按浏览器语言选择入口，手动切换后记住选择
+- 标签、分类、归档、分页、Atom、sitemap、robots、404、SEO / Open Graph / JSON-LD
+- Pagefind 全文搜索，按语言过滤，不索引代码和公式
+- 客户端不用前端框架，每套主题只带一个小脚本
+
+**主题**
+
+- 五套内置主题，每套都实现全部页面类型，支持亮 / 暗模式
+- 主题是独立目录，用 TypeScript 写布局；博客仓库里同名主题会覆盖内置主题
+
+**发布与质量**
+
+- `dxbe deploy` 一条命令构建、检查并推送到 GitHub Pages 仓库，源码仓库可以私有；也可以用 GitHub Actions 部署
+- 构建先写临时目录再整体替换，输出确定（同样输入两次构建结果逐字节相同）
+- 内置内部链接、SEO、主题一致性检查；GitHub Actions 部署完成后自动跑 smoke test
+- CI 在 Ubuntu 和 Windows 上都跑
 
 ## 快速开始
 
-需要 Node.js 24 或更高版本。下面的命令安装 v0.9.0 发布版；folio、scholar 改为与 apogee / capstan 相同的侧栏布局从 0.9.0 开始，文章封面和 `dxbe help` 从 0.8.0 开始提供，加密文章和 `dxbe deploy` 从 0.7.0 开始，apogee / capstan 主题、个人主页、分类、发表页和 PDF 嵌入从 0.6.0 开始。
+需要 Node.js 24 或更高版本。
 
 ```bash
-mkdir my-blog
-cd my-blog
+mkdir my-blog && cd my-blog
 npm init -y
 npm install https://github.com/dx3906999/dxbe/releases/download/v0.9.0/dxbe-0.9.0.tgz
 npx dxbe setup
 npx dxbe dev
 ```
 
-第一次用？[docs/tutorial.md](docs/tutorial.md) 从建仓库、部署到写文章、发布一步步走完。命令行里 `npx dxbe help` 列出所有命令，`npx dxbe <命令> --help` 显示参数和例子。
-
-发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.9.0`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
-
-`setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。它同时把仓库补成能直接构建和部署的样子：`package.json` 设为 `"type": "module"`（`npm init -y` 默认是 `commonjs`，配置文件会加载失败）并补上 `dev`、`build`、`check` 等脚本，生成 `.nvmrc`（部署工作流从这里读 Node 版本）和 `.gitignore`。已有的脚本和文件不会被覆盖。非交互使用：
+`setup` 会问作者、站点标题、域名和主题，生成 `site.config.ts`，并把仓库补成能直接构建和部署的样子：`package.json` 设为 ESM、补上 `dev` / `build` / `check` 等脚本、生成 `.nvmrc` 和 `.gitignore`。已有的脚本和文件不会被覆盖。也可以不交互：
 
 ```bash
-npx dxbe setup --yes --force \
-  --name "Your Name" \
-  --url "https://example.com" \
-  --theme folio
+npx dxbe setup --yes --force --name "Your Name" --url "https://example.com" --theme folio
 ```
 
-博客仓库最终只需要：
+第一次用的话，[docs/tutorial.md](docs/tutorial.md) 从建仓库、写第一篇文章到部署上线完整走一遍。
+
+> 从 Release 的 tarball 安装不需要 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.9.0`，npm 会把依赖记成 `git+ssh`，CI 里需要 SSH key 或把 SSH URL 改写成 HTTPS。
+
+博客仓库最后只需要这些：
 
 ```
-content/
-public/                    # 可选：favicon、CNAME 等；没有 favicon.svg 时用 dxbe 自带的
-themes/                    # 可选：覆盖或新增主题
-site.config.ts
-package.json
-.nvmrc                     # setup 生成
-.gitignore                 # setup 生成
-.github/workflows/deploy.yml
+content/                      文章和页面
+public/                       可选：favicon、CNAME 等静态文件
+themes/                       可选：覆盖或新增主题
+site.config.ts                站点配置
+package.json                  依赖 dxbe
+.github/workflows/deploy.yml  使用 GitHub Actions 部署时
 ```
 
-引擎、内置主题、检查脚本和 Pagefind 都由 `dxbe` 依赖提供。
+## 主题
+
+| 主题 | 风格 |
+| --- | --- |
+| `folio` | 独立杂志 / 文学期刊：衬线正文、大留白、细规则线 |
+| `scholar` | 期刊论文：摘要、关键词、编号章节、打印样式 |
+| `orbital` | 70 年代技术手册 / CRT 终端：等宽元信息、技术网格、磷光琥珀色 |
+| `apogee` | NASA punk：骨白硬件面板、方格纸底、五色复古条纹、检查清单式目录 |
+| `capstan` | 磁带未来主义：米色机身、琴键式导航、琥珀荧光屏、在两根滚轴间走纸的正文 |
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/scholar-post.png" alt="scholar 文章页"><br><sub><code>scholar</code> 文章页</sub></td>
+    <td width="50%"><img src="docs/screenshots/apogee-home.png" alt="apogee 文章列表"><br><sub><code>apogee</code> 文章列表</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/capstan-post.png" alt="capstan 文章页"><br><sub><code>capstan</code> 文章页</sub></td>
+    <td width="50%"><img src="docs/screenshots/orbital-post.png" alt="orbital 文章页"><br><sub><code>orbital</code> 文章页</sub></td>
+  </tr>
+</table>
+
+在 `site.config.ts` 里写 `theme: { name: 'scholar' }` 换主题，内容不用改。本地先看效果：
+
+```bash
+npx dxbe dev --theme=scholar
+```
+
+更多截图见 [主题截图](docs/theme-gallery.md)，自己写主题见 [主题开发](docs/theming.md)。
 
 ## 命令
 
-`dxbe setup` 会在博客仓库的 `package.json` 里补上这些脚本（已有的同名脚本保持不变）：
-
-```json
-{
-  "scripts": {
-    "dev": "dxbe dev",
-    "build": "dxbe build",
-    "check": "dxbe check",
-    "preview": "dxbe preview",
-    "new": "dxbe new",
-    "index": "dxbe index",
-    "clean": "dxbe clean"
-  }
-}
-```
-
 | 命令 | 作用 |
 | --- | --- |
-| `dxbe dev` | 本地开发，监听内容、主题和配置，并重建搜索索引 |
-| `dxbe build` | 生成 `dist/`，不建搜索索引 |
-| `dxbe check` | 构建、链接、SEO、主题一致性、Pagefind 索引 |
-| `dxbe index` | 只重建 Pagefind 索引 |
-| `dxbe preview` | 静态服务 `dist/` |
-| `dxbe new "标题" --slug hello-world --lang zh` | 新建文章目录和 frontmatter |
-| `dxbe check:deterministic` | 连续构建两次并比较产物 |
-| `dxbe check:theme` | 用当前内容构建全部内置主题 |
-| `dxbe clean` | 删除 `dist/`、缓存和开发产物 |
+| `dxbe dev` | 本地开发，监听内容、主题和配置变化，自动重建（含搜索索引） |
+| `dxbe new "标题" --slug hello-world` | 新建文章目录和 frontmatter |
+| `dxbe build` | 构建到 `dist/`（不含搜索索引） |
+| `dxbe index` | 为 `dist/` 生成 Pagefind 搜索索引 |
+| `dxbe check` | 构建，并检查链接、SEO、主题一致性，生成搜索索引 |
+| `dxbe preview` | 用静态服务器预览 `dist/` |
+| `dxbe deploy` | 生产构建、检查，推送到 `deploy.repo`（`--dry-run` 只提交不推送） |
 | `dxbe setup` | 交互式生成或更新 `site.config.ts` |
-| `dxbe deploy` | 生产构建、检查，并把 `dist/` 推到 `deploy.repo`（`--dry-run` 只提交不推送） |
-| `dxbe smoke` | 部署后冒烟测试，需要 `BASE_URL` |
-| `dxbe help [命令]` | 列出命令，或显示某个命令的参数和例子（也可以 `dxbe <命令> --help`） |
-| `dxbe --version` | 显示 dxbe 版本 |
+| `dxbe clean` | 删除 `dist/`、缓存和开发产物 |
+| `dxbe help [命令]` | 列出全部命令，或查看某个命令的参数和例子 |
 
-生产预览：
+另外还有 `check:links`、`check:seo`、`check:theme`、`check:deterministic` 和部署后用的 `smoke`，用 `npx dxbe help` 查看。
 
-```bash
-npx dxbe build
-npx dxbe index
-npx dxbe preview
-```
+## 写作与配置
 
-开发模式会为 `.dev-dist/<port>/` 自动重建 Pagefind 索引，本地搜索可用；生产构建仍然单独执行 `npx dxbe index`。
-
-## 构建流程
-
-```
-site.config.ts + content/
-  → frontmatter 校验
-  → Markdown、Shiki、KaTeX
-  → 语言、译文、标签、归档、分页
-  → 主题布局
-  → dist/ + Atom + sitemap + robots
-  → Pagefind 索引
-```
-
-构建先写入临时目录，完成后替换 `dist/`，不会留下半成品。Pagefind 是独立步骤，只扫描带 `data-pagefind-body` 的文章和页面。
-
-## 站点配置
-
-`site.config.ts` 是唯一的站点身份来源。主要字段：
-
-- `identity.author`：姓名、邮箱、主页、头像
-- `identity.social`：GitHub、邮箱、RSS 等
-- `identity.repository`：可选的 owner/name，用于页脚源码链接
-- `locales.default` / `locales.entries`：语言列表，中英文各自的标题、描述、tagline
-- `site.url`：生产域名 origin；CI 会由 `configure-pages` 注入 `SITE_URL`
-- `site.base`：站点根路径；项目页由 `SITE_BASE` 注入，例如 `/my-blog`。Windows Git Bash 本地模拟时加 `MSYS_NO_PATHCONV=1`，否则 `/my-blog` 会被转换成 Windows 路径
-- `site.customDomain`：设置后生成 `dist/CNAME`
-- `site.timezone`：日期展示时区
-- `site.license`：页脚展示的代码/内容许可证
-- `theme.name`：`folio`、`orbital`、`scholar`、`apogee` 或 `capstan`
-- `theme.config`：主题自己的配置，由主题的 zod schema 校验
-- `nav`：导航项，路径是语言无关的，渲染时自动加语言前缀
-- `home.layout`：`posts`（默认，首页是文章列表）或 `profile`（首页渲染 `home.page` 指定的页面，文章列表移到 `/posts/`）
-- `pagination.perPage`：每页文章数
-- `features.search` / `features.math`：搜索和公式
-- `features.publications`：开启后 `pages/publications.md` 发布在 `/publications/`
-- `deploy.repo` / `deploy.branch`：`dxbe deploy` 推送的网站仓库和分支
-- `markdown.allowHtml`：允许正文里的原始 HTML（经过 sanitize），默认关闭；`markdown.shiki`：代码高亮的明暗主题
-- `features.autoLanguage`：首页按浏览器语言跳转，默认开启；深链接不跳转，手动选择会记住
-
-自动语言选择只作用于默认语言首页；文章、页面和其他语言首页不会重定向。按浏览器偏好顺序取第一个站点支持的语言，如果它就是默认语言则停留。每个标签页只自动跳转一次，之后返回首页不会被反复重定向。用户点过语言切换后，选择会写入 localStorage，后续访问首页优先按这个选择。设置 `features.autoLanguage: false` 可完全关闭。
-
-所有内部链接由 helper 生成。项目页部署不要手写 `/` 开头的资源路径。完整字段和非交互参数见 [docs/customization.md](docs/customization.md)。
-
-## 内容
-
-```
-content/
-  zh/posts/how-this-site-works/index.md
-  zh/posts/how-this-site-works/cover.jpg
-  zh/posts/how-this-site-works/paper.pdf
-  en/posts/how-this-site-works/index.md
-  zh/pages/about.md
-  zh/pages/publications.md
-  en/pages/about.md
-```
-
-Frontmatter：
+文章放在 `content/<语言>/posts/<slug>/index.md`，图片、PDF 等附件放在同一目录：
 
 ```yaml
 ---
-title: 标题
+title: 这个站点是怎么搭起来的
 date: 2026-10-22T10:00:00+08:00
-updated: 2026-10-23T09:00:00+08:00
 tags: [工程, 静态站点]
 categories: [工程实践]
-slug: how-this-site-works
-translationKey: how-this-site-works
 summary: 可选的摘要
-cover: cover.jpg   # 可选的封面图
+cover: cover.jpg     # 可选的封面
+encrypt: diary       # 可选：按 passwords.yml 里的密码加密正文
 draft: false
 ---
 ```
 
-规则：
+`date` 必须带时区；`translationKey` 相同（默认取目录名）的中英文章互为译文；草稿只在开发模式可见。封面、PDF、加密文章和全部字段见 [写作](docs/authoring.md)。
 
-- `date` 必须带时区偏移
-- 文章和页面的 `slug` 只用小写 ASCII、数字和连字符
-- `translationKey` 相同的文章互为译文，默认取目录名
-- 同目录的图片、PDF 等文件会复制到文章输出目录，Markdown 用相对路径引用；页面也可以写成 `pages/<slug>/index.md` 带附件
-- 草稿在开发模式可见，生产构建排除；未来日期的文章默认排除
-- 数学用 `$...$` 和 `$$...$$`；代码块用围栏语法
+站点身份、语言、导航、主题、首页布局和功能开关都在 `site.config.ts`：
 
-### PDF
+```ts
+import { defineConfig } from 'dxbe/config'
 
-PDF 放进文章目录，单独一行写图片语法：
-
-```markdown
-![论文全文](paper.pdf)
-![第 3 页](paper.pdf#page=3 "图 2：实验装置")
+export default defineConfig({
+  identity: { author: { name: 'Your Name' }, social: [] },
+  locales: {
+    default: 'zh',
+    entries: {
+      zh: { label: '中文', title: '我的博客', description: '…' },
+      en: { label: 'English', title: 'My Blog', description: '…' },
+    },
+  },
+  site: { url: 'https://example.com', timezone: 'Asia/Shanghai' },
+  theme: { name: 'folio' },
+  home: { layout: 'profile', page: 'home' },
+  features: { search: true, math: true, publications: true },
+})
 ```
 
-构建结果是内嵌阅读器加一行标题链接。多数手机浏览器不能内嵌 PDF，会直接显示链接；打印时只留链接。写在句子中间的 `![论文](paper.pdf)` 只生成普通链接。`public/` 里的 PDF 用站点路径（`/files/cv.pdf`）引用，项目页部署会自动加 `base`；`dxbe check:links` 会检查 PDF 是否存在。发表页的 `links` 也可以指向站内 PDF。
+配置在加载时按 schema 严格校验，写错的字段会报出路径。所有字段的说明见 [配置与复用](docs/customization.md)。
 
-### 加密文章
+## 部署
 
-frontmatter 写 `encrypt: diary`，在博客根目录的 `passwords.yml`（已被 setup 加进 `.gitignore`）里写 `diary: 密码`。页面里只有密文，标题、日期、标签和 `summary` 仍然公开。公开仓库里的 Markdown 是明文，所以用加密文章时源码仓库要私有，用 `dxbe deploy` 发布。
+两种方式，都发布到 GitHub Pages：
 
-详细说明见 [docs/authoring.md](docs/authoring.md)。
+- **`dxbe deploy`**：在本地构建、检查，然后把 `dist/` 推到配置里 `deploy.repo` 指定的仓库。源码仓库可以私有，用加密文章时必须这样做。
+- **GitHub Actions**：把 [`templates/deploy.yml`](templates/deploy.yml) 复制到博客仓库的 `.github/workflows/deploy.yml`，Pages 的 Source 选 **GitHub Actions**，推送 `main` 即可。工作流会构建、检查、生成搜索索引、部署，最后跑 smoke test。
 
-## 主题
+项目页（`<user>.github.io/<repo>/`）的子路径会自动注入，不需要在配置里写仓库名；设置 `site.customDomain` 会生成 `CNAME`。完整的部署链路在 [dxbe-e2e](https://github.com/dx3906999/dxbe-e2e) 上持续验证（[线上地址](https://dx3906999.github.io/dxbe-e2e/)）。细节和常见故障见 [部署](docs/deployment.md)。
 
-| 主题 | 定位 | 更换方式 |
-| --- | --- | --- |
-| `folio` | 独立杂志 / 文学期刊；衬线正文、大留白、细规则线 | `theme.name: 'folio'` |
-| `orbital` | 70 年代技术手册 / CRT 终端；等宽元信息、网格、磷光强调色 | `theme.name: 'orbital'` |
-| `scholar` | 期刊论文；摘要、编号章节、左侧目录、打印样式 | `theme.name: 'scholar'` |
-| `apogee` | NASA punk；骨白硬件面板、方格纸、五色条纹、检查清单式目录、Archivo / JetBrains Mono | `theme.name: 'apogee'` |
-| `capstan` | 磁带未来主义；米色机身、琴键式按钮、荧光屏、在两根滚轴间走纸的正文、Chakra Petch | `theme.name: 'capstan'` |
+## 文档
 
-本地预览某套主题：
+| 文档 | 内容 |
+| --- | --- |
+| [从零到上线](docs/tutorial.md) | 建仓库、写文章、部署、日常发布的完整流程 |
+| [写作](docs/authoring.md) | 目录结构、frontmatter、封面、PDF、加密文章、公式 |
+| [配置与复用](docs/customization.md) | `site.config.ts` 全部字段、增加语言、站点路径、换主题 |
+| [部署](docs/deployment.md) | `dxbe deploy`、GitHub Actions、自定义域名、回滚、故障排查 |
+| [主题开发](docs/theming.md) | 主题目录、上下文、模板、资源、文案、一致性测试 |
+| [主题截图](docs/theme-gallery.md) | 五套主题的截图和选择建议 |
+| [升级与发布](docs/releasing.md) | 博客仓库升级 dxbe、引擎发布新版本 |
+| [架构](docs/architecture.md) | 构建流水线、模块边界、语言选择、缓存与确定性 |
+| [设计检查清单](docs/design-review.md) | 主题的视觉和可用性检查项 |
+| [ADR](docs/adr/) | 主要技术决策的记录 |
 
-```bash
-npx dxbe dev --theme=orbital
-npx dxbe dev --theme=scholar
-```
-
-主题目录包含 `theme.json`、`theme.ts`、`layouts/`、`assets/`、`i18n/`。自定义主题放在博客仓库的 `themes/<name>/`，同名主题会覆盖内置主题；外部主题从 `dxbe/theme` 导入公共 API。接口说明见 [docs/theming.md](docs/theming.md)，截图见 [docs/theme-gallery.md](docs/theme-gallery.md)。
-
-## 部署到 GitHub Pages
-
-有两种方式。源码仓库私有、或者想像 `hexo deploy` 一样一条命令发布时，用 `dxbe deploy`，见 [docs/deployment.md](docs/deployment.md#一条命令部署dxbe-deploy)。下面是用 GitHub Actions 的方式。
-
-引擎仓库不部署自身。部署工作流是 `templates/deploy.yml`，复制到博客仓库后使用。完整的部署链路在 [dxbe-e2e](https://github.com/dx3906999/dxbe-e2e) 上持续验证，线上地址是 [dx3906999.github.io/dxbe-e2e](https://dx3906999.github.io/dxbe-e2e/)。
-
-1. 创建博客仓库，安装 `dxbe`，放好 `content/`、`site.config.ts` 和 `public/`。免费计划下仓库必须是 public。
-2. 把 `templates/deploy.yml` 复制到博客仓库的 `.github/workflows/deploy.yml`。
-3. 在 Settings → Pages → Build and deployment → Source 选择 **GitHub Actions**。
-4. 推送 `main`，或手动运行 **Deploy**。
-5. 工作流完成主题检查、构建、链接/SEO 检查、Pagefind 索引、上传 artifact、部署和 smoke test。
-
-项目页部署时，站点根是 `https://<user>.github.io/<repo>/`。`actions/configure-pages` 会注入 `origin` 和 `base_path`，不需要在配置里写仓库名。
-
-自定义域名：
-
-- 在 `site.config.ts` 设置 `site.customDomain`，构建会生成 `dist/CNAME`
-- 在 Pages 设置里填写域名并按 GitHub 的说明配置 DNS
-- 开启 Enforce HTTPS
-
-GitHub Pages 没有服务端重定向和自定义响应头；站点总大小限制 1 GB，带宽 100 GB/月，构建频率 10 次/小时。详细说明见 [docs/deployment.md](docs/deployment.md)。
-
-## 引擎开发
-
-仓库里的 `content/` 是演示/测试站点。需要 Node.js 24 或更高版本。
+## 开发
 
 ```bash
 npm ci
-npm run dev
-npm run check
+npm run dev      # 用仓库里的演示内容启动 dev server
+npm run check    # lint、类型检查、测试，加一次完整构建和全部检查
 ```
 
-修改 `src/`、`themes/` 或演示内容会触发 dev server 重建。构建 npm 包：
+修改 `src/`、`themes/` 或演示内容会触发重建。打包：
 
 ```bash
 npm run build:package
 npm pack --dry-run
 ```
 
-`npm run check` 包含 lint、类型检查、单元/集成测试，以及一次完整构建、链接检查、SEO 检查、主题一致性检查和 Pagefind 索引。
-
-## CI/CD
-
-- `.github/workflows/ci.yml`：PR 和 `main` 推送；Ubuntu + Windows；跑 `npm run check`、确定性检查、actionlint，并验证 npm 包内容
-- `templates/deploy.yml`：博客实例的 Pages 部署模板，复制到博客仓库后使用
-- `.github/workflows/release.yml`：推送 `v*` tag 时先确认 tag 与 `package.json` 版本一致，再构建 tarball 并创建 GitHub Release；完整的发布和升级步骤见 [docs/releasing.md](docs/releasing.md)
-- `.github/workflows/external-links.yml`：每周检查内容里的外部链接
-- `.github/dependabot.yml`：每周更新 npm 和 GitHub Actions
-
-## 目录
-
-引擎仓库：
-
 ```
-themes/              folio / orbital / scholar / apogee / capstan（随包发布）
-src/core/            配置、扫描、Markdown、路由、渲染、输出
-src/theme/           主题 API、加载器、资源、i18n
-src/cli/             bin 子命令、检查、Pagefind、开发服务器
-src/assets/          search.js（随包发布）
-scripts/             包构建时复制主题资源和 search.js
-tests/               单元和集成测试
-docs/                架构、写作、主题、部署、发布、设计检查
-content/             演示站点（不随包发布）
-site.config.ts       演示配置（不随包发布）
-templates/deploy.yml 博客仓库部署模板
+src/core/      配置、内容扫描、Markdown、路由、渲染、输出
+src/theme/     主题 API、加载器、资源、i18n
+src/cli/       命令行、检查、Pagefind、开发服务器
+src/assets/    搜索脚本（随包发布）
+themes/        五套内置主题（随包发布）
+templates/     博客仓库的部署工作流模板
+tests/         单元和集成测试
+docs/          文档
+content/       演示站点（不随包发布）
 ```
 
-博客仓库：
-
-```
-content/             文章和页面
-public/              可选的静态文件
-themes/              可选的自定义主题
-site.config.ts       站点配置
-package.json         依赖 dxbe
-.github/workflows/deploy.yml
-```
+CI（`.github/workflows/ci.yml`）在 Ubuntu 和 Windows 上跑 `npm run check`、确定性检查和 actionlint，并检查 npm 包内容。推送 `v*` tag 会触发 Release 工作流，校验版本号后构建 tarball 并创建 Release，步骤见 [升级与发布](docs/releasing.md)。
 
 ## 设计原则
 
-内置主题不是换色皮肤。界面避免紫色渐变、玻璃拟态、通用 3D 插画、emoji 标题和空泛文案；示例内容写具体的技术或排版问题。完整检查项见 [docs/design-review.md](docs/design-review.md)。
+内置主题不是换色皮肤，每套都有自己的排版系统和页面结构。界面避免紫色渐变、玻璃拟态、通用 3D 插画、emoji 标题和空泛文案；示例内容写具体的技术或排版问题。检查项见 [设计检查清单](docs/design-review.md)。
 
 ## 许可
 
-- 代码：MIT，见 [LICENSE](LICENSE)
-- 内容：CC BY-NC-SA 4.0（可在 `site.config.ts` 中调整声明）
+- 代码：[MIT](LICENSE)
+- 演示内容：CC BY-NC-SA 4.0；自己博客的内容许可在 `site.config.ts` 的 `site.license` 里声明
