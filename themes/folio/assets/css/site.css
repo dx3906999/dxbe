@@ -369,6 +369,12 @@ figcaption {
   line-height: 1.8;
 }
 
+/* pages have no aside, so their body sits in the same column as the header */
+.page > .post-body {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
 .post-body > :first-child {
   margin-top: 0;
 }
@@ -893,7 +899,125 @@ html[data-theme="dark"] .shiki {
   }
 
   .post-header,
-  .post-body {
+  .post-body,
+  .page > .post-body {
     max-width: none;
   }
+}
+
+/* publications */
+
+.pub-list {
+  max-width: var(--measure);
+  margin: 2.4rem auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pub {
+  padding: 1.4rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.pub-type,
+.pub-venue,
+.pub-links {
+  margin: 0;
+  color: var(--ink-soft);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+}
+
+.pub-type {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pub-title {
+  margin: 0.25rem 0 0.4rem;
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.pub-authors,
+.pub-note {
+  margin: 0 0 0.3rem;
+}
+
+.pub-note {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.pub-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.pub-links a {
+  color: var(--accent);
+}
+
+/* embedded PDF: ![label](file.pdf) on its own line */
+
+.pdf-embed {
+  margin: 2rem 0;
+}
+
+.pdf-embed__frame {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1.3;
+  max-height: 85vh;
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+}
+
+.pdf-embed__fallback {
+  display: block;
+  padding: 1.2rem;
+  font-family: var(--font-sans);
+}
+
+.pdf-embed__type {
+  margin-left: 0.35rem;
+  letter-spacing: 0.08em;
+}
+
+@media print {
+  .pdf-embed__frame {
+    display: none;
+  }
+}
+
+/* profile home: latest posts under the introduction */
+
+.home-latest {
+  max-width: var(--measure);
+  margin: 3.5rem auto 0;
+}
+
+.home-latest-title {
+  margin: 0 0 0.6rem;
+  color: var(--ink-soft);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.home-all {
+  margin: 0;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+}
+
+.home-all a {
+  color: var(--accent);
 }

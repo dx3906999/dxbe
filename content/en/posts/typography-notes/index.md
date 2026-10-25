@@ -22,6 +22,12 @@ Retro-futurism. Monospace carries metadata and navigation; narrow sans-serif car
 
 Academic. Serif text, numbered sections, an abstract, sidenotes, and references. Print styles are part of the theme, not an afterthought.
 
+## Attachments
+
+A PDF lives in the post directory like an image. `![Label](file.pdf)` on its own line embeds a viewer; most phone browsers cannot show PDFs inline, so the caption link always works.
+
+![Type specimen](type-specimen.pdf)
+
 ## Shared constraints
 
 - Hide the logo and accent color; the layout should still identify the theme.

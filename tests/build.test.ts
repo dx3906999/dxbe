@@ -90,6 +90,22 @@ describe('site build', () => {
     const page = result.tasks.find((task) => task.lang === 'zh' && task.kind === 'publications')
     expect(page?.urlPath).toBe('/publications/')
     expect(page?.pageItem?.publications?.[0]?.authors.length).toBeGreaterThan(0)
+    // the entries live in frontmatter, so the theme has to print them
+    const html = await readFile(path.join(root, outDir, 'publications', 'index.html'), 'utf8')
+    expect(html).toContain(page?.pageItem?.publications?.[0]?.title ?? '(missing)')
+  })
+
+  it('copies a post PDF next to the post and embeds it', async () => {
+    const post = path.join(root, outDir, 'posts', 'typography-notes')
+    await expect(access(path.join(post, 'type-specimen.pdf'))).resolves.toBeUndefined()
+    const html = await readFile(path.join(post, 'index.html'), 'utf8')
+    expect(html).toContain('<object class="pdf-embed__frame" data="type-specimen.pdf"')
+  })
+
+  it('gives feed entries a base so relative asset links resolve', async () => {
+    const atom = await readFile(path.join(root, outDir, 'atom.xml'), 'utf8')
+    const url = absoluteUrl(loaded.url, loaded.base, '/posts/typography-notes/')
+    expect(atom).toContain(`<content type="html" xml:base="${url}">`)
   })
 
   it('writes feeds, sitemap, robots, and 404', async () => {

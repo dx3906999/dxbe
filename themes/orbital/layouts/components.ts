@@ -1,4 +1,4 @@
-import { html, type Post, type ThemeContext } from '../../../src/theme/api.ts'
+import { html, type Post, type TagView, type ThemeContext } from '../../../src/theme/api.ts'
 import { getOrbitalConfig } from '../config.ts'
 
 export function tagLinks(ctx: ThemeContext, tags: string[]) {
@@ -68,13 +68,17 @@ export function prevNext(ctx: ThemeContext) {
   </nav>`
 }
 
-export function tagCloud(ctx: ThemeContext) {
-  const tags = ctx.tags ?? []
+/** Tags by default; categories pass their own list and URL helper. */
+export function tagCloud(
+  ctx: ThemeContext,
+  tags: TagView[] = ctx.tags ?? [],
+  url: (tag: TagView) => string = ctx.helpers.tagUrl,
+) {
   if (tags.length === 0) return html`<p class="empty">${ctx.i18n.t('tag.empty')}</p>`
   return html`<ul class="orbital-tag-grid">
     ${tags.map(
       (tag) => html`<li>
-        <a href="${ctx.helpers.tagUrl(tag)}">
+        <a href="${url(tag)}">
           <span class="tag-name">${tag.name}</span>
           <span class="tag-count">${String(tag.count).padStart(2, '0')}</span>
         </a>
@@ -95,13 +99,13 @@ export function archiveList(ctx: ThemeContext) {
   </div>`
 }
 
-export function pageHeader(ctx: ThemeContext, extra?: { count?: number }) {
+export function pageHeader(ctx: ThemeContext, extra?: { count?: number; countKey?: string }) {
   return html`<header class="orbital-page-header">
     <p class="kicker">${ctx.page.kind.toUpperCase()}</p>
     <h1>${ctx.page.title}</h1>
     ${
       extra?.count !== undefined
-        ? html`<p class="page-count">${ctx.i18n.t('page.tagPosts', { count: extra.count })}</p>`
+        ? html`<p class="page-count">${ctx.i18n.t(extra.countKey ?? 'page.tagPosts', { count: extra.count })}</p>`
         : ''
     }
   </header>`

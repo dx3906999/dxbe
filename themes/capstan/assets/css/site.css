@@ -2650,3 +2650,50 @@ a.cp-adjacent__key:hover .cp-engrave {
     box-shadow: none;
   }
 }
+
+/* embedded PDF: ![label](file.pdf) on its own line */
+
+.cp-prose .pdf-embed {
+  margin: 26px 0;
+}
+
+.pdf-embed__frame {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1.3;
+  max-height: 85vh;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.pdf-embed__fallback {
+  display: block;
+  padding: 16px;
+  font: 600 12px/1.5 var(--font-mono);
+}
+
+.pdf-embed__caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--mute);
+  font: 600 11.5px/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+.pdf-embed__type {
+  padding: 3px 6px;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  color: var(--ink);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+}
+
+@media print {
+  .pdf-embed__frame {
+    display: none;
+  }
+}

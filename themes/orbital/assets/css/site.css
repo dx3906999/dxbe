@@ -897,3 +897,133 @@ html[data-theme="light"] .shiki span {
     font-size: 11pt;
   }
 }
+
+/* publications */
+
+.orbital-pubs {
+  max-width: var(--measure);
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.orbital-pub {
+  padding: 1.2rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.orbital-pub-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.orbital-pub-title {
+  margin: 0.35rem 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1.3;
+}
+
+.orbital-pub-authors,
+.orbital-pub-venue,
+.orbital-pub-note {
+  margin: 0 0 0.25rem;
+}
+
+.orbital-pub-venue,
+.orbital-pub-note {
+  color: var(--dim);
+}
+
+.orbital-pub-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.6rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.orbital-pub-links a {
+  padding: 0.15rem 0.55rem;
+  border: 1px solid var(--line);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.orbital-pub-links a:hover {
+  border-color: var(--accent);
+}
+
+/* embedded PDF: ![label](file.pdf) on its own line */
+
+.pdf-embed {
+  margin: 1.5rem 0;
+}
+
+.pdf-embed__frame {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1.3;
+  max-height: 85vh;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+
+.pdf-embed__fallback {
+  display: block;
+  padding: 1rem 1.1rem;
+  font-family: var(--font-mono);
+}
+
+.pdf-embed__caption {
+  margin-top: 0.5rem;
+  color: var(--dim);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.pdf-embed__type {
+  margin-left: 0.4rem;
+  color: var(--accent);
+}
+
+@media print {
+  .pdf-embed__frame {
+    display: none;
+  }
+}
+
+/* profile home: latest entries under the introduction */
+
+.orbital-latest {
+  margin-top: 3.5rem;
+}
+
+.orbital-latest-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.orbital-latest-head .kicker {
+  margin: 0;
+}
+
+.orbital-latest-head a {
+  text-decoration: none;
+}
+
+.orbital-latest .index-list {
+  margin-top: 0.8rem;
+}

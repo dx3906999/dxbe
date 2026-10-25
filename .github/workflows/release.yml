@@ -25,6 +25,15 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Check the tag matches package.json
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$RELEASE_TAG" ]; then
+            echo "::error::tag $RELEASE_TAG does not match package.json version $version; the install URL would point at a missing tarball"
+            exit 1
+          fi
       - run: npm ci
       - run: npm run build:package
       - run: npm pack

@@ -16,3 +16,4 @@ site.config.ts.bak
 .env
 .env.*
 !.env.example
+.kiro/

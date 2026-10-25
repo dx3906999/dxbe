@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import rehypeShiki from '@shikijs/rehype'
-import type { Element, Root as HastRoot } from 'hast'
+import type { Element, ElementContent, Root as HastRoot } from 'hast'
 import { toText } from 'hast-util-to-text'
 import type { Root as MdastRoot } from 'mdast'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
@@ -17,14 +17,14 @@ import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import type { Processor } from 'unified'
 import { unified } from 'unified'
-import { visit } from 'unist-util-visit'
+import { SKIP, visit } from 'unist-util-visit'
 import { readingMinutes } from '../shared/date.ts'
 import { BuildError } from '../shared/errors.ts'
 import { stripHtml } from '../shared/html.ts'
 import type { SiteConfig } from './config.ts'
 import type { TocEntry } from './types.ts'
 
-const PIPELINE_VERSION = '3'
+const PIPELINE_VERSION = '4'
 
 export interface MarkdownResult {
   html: string
@@ -59,12 +59,117 @@ function collectToc() {
 
 type MarkdownProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, string>
 
+const PDF_PATH = /\.pdf$/i
+
+function isPdf(src: string): boolean {
+  if (/^data:/i.test(src)) return false
+  return PDF_PATH.test(src.split(/[?#]/, 1)[0] ?? '')
+}
+
+function pdfFileName(src: string): string {
+  const name = (src.split(/[?#]/, 1)[0] ?? '').split('/').pop() ?? ''
+  try {
+    return decodeURIComponent(name)
+  } catch {
+    return name
+  }
+}
+
+function isBlank(node: ElementContent): boolean {
+  return node.type === 'text' && node.value.trim() === ''
+}
+
+/**
+ * `![label](file.pdf)` cannot render as an image. On its own line it becomes an
+ * embedded viewer with a caption link (the link is what phones get, since most
+ * mobile browsers do not render PDFs inline); inside a sentence it becomes a link.
+ */
+function pdfImage(node: ElementContent | undefined): { src: string; label: string } | undefined {
+  if (node?.type !== 'element' || node.tagName !== 'img') return undefined
+  const src = node.properties?.src
+  if (typeof src !== 'string' || !isPdf(src)) return undefined
+  const alt = typeof node.properties.alt === 'string' ? node.properties.alt : ''
+  const title = typeof node.properties.title === 'string' ? node.properties.title : ''
+  return { src, label: title || alt || pdfFileName(src) }
+}
+
+function pdfLink(src: string, label: string, className?: string): Element {
+  return {
+    type: 'element',
+    tagName: 'a',
+    properties: className ? { className: [className], href: src } : { href: src },
+    children: [{ type: 'text', value: label }],
+  }
+}
+
+function pdfFigure(src: string, label: string): Element {
+  return {
+    type: 'element',
+    tagName: 'figure',
+    properties: { className: ['pdf-embed'] },
+    children: [
+      {
+        type: 'element',
+        tagName: 'object',
+        properties: {
+          className: ['pdf-embed__frame'],
+          data: src,
+          type: 'application/pdf',
+          ariaLabel: label,
+        },
+        children: [pdfLink(src, label, 'pdf-embed__fallback')],
+      },
+      {
+        type: 'element',
+        tagName: 'figcaption',
+        properties: { className: ['pdf-embed__caption'] },
+        children: [
+          pdfLink(src, label),
+          { type: 'text', value: ' ' },
+          {
+            type: 'element',
+            tagName: 'span',
+            properties: { className: ['pdf-embed__type'] },
+            children: [{ type: 'text', value: 'PDF' }],
+          },
+        ],
+      },
+    ],
+  }
+}
+
+function rehypePdfEmbed() {
+  return (tree: HastRoot): void => {
+    visit(tree, 'element', (node: Element, index, parent) => {
+      if (node.tagName !== 'p' || !parent || index === undefined) return
+      const content = node.children.filter((child) => !isBlank(child))
+      const pdf = content.length === 1 ? pdfImage(content[0]) : undefined
+      if (!pdf) return
+      parent.children.splice(index, 1, pdfFigure(pdf.src, pdf.label))
+      return SKIP
+    })
+
+    visit(tree, 'element', (node: Element, index, parent) => {
+      const pdf = pdfImage(node)
+      if (!pdf || !parent || index === undefined) return
+      // an image inside a link keeps that link's target; only its text survives
+      const inLink = parent.type === 'element' && parent.tagName === 'a'
+      parent.children.splice(
+        index,
+        1,
+        inLink ? { type: 'text', value: pdf.label } : pdfLink(pdf.src, pdf.label),
+      )
+      return SKIP
+    })
+  }
+}
+
 function rehypeBaseLinks(options: { base: string }) {
   const prefix = options.base === '/' ? '' : options.base.replace(/\/$/, '')
   return (tree: HastRoot): void => {
     if (!prefix) return
     visit(tree, 'element', (node: Element) => {
-      for (const property of ['href', 'src'] as const) {
+      for (const property of ['href', 'src', 'data'] as const) {
         const value = node.properties?.[property]
         if (typeof value !== 'string') continue
         if (!value.startsWith('/') || value.startsWith('//')) continue
@@ -88,7 +193,8 @@ function buildProcessor(config: SiteConfig): MarkdownProcessor {
   if (allowHtml) {
     processor = processor.use(rehypeRaw).use(rehypeSanitize) as unknown as MarkdownProcessor
   }
-  processor = processor.use(rehypeBaseLinks as never, {
+  // after sanitize: the embed is engine markup, not author HTML
+  processor = processor.use(rehypePdfEmbed).use(rehypeBaseLinks as never, {
     base: config.site.base,
   }) as unknown as MarkdownProcessor
   processor = processor.use(rehypeSlug).use(rehypeAutolinkHeadings, {

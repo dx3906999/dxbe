@@ -60,3 +60,6 @@ a11y:
   skip: Skip to content
 tag:
   empty: No tags yet.
+home:
+  latest: Recent posts
+  allPosts: All posts

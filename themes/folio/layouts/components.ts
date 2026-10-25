@@ -1,4 +1,4 @@
-import { html, type Post, type ThemeContext } from '../../../src/theme/api.ts'
+import { html, type Post, type TagView, type ThemeContext } from '../../../src/theme/api.ts'
 import { getFolioConfig } from '../config.ts'
 
 export function postMeta(ctx: ThemeContext, post: Post) {
@@ -75,13 +75,17 @@ export function prevNext(ctx: ThemeContext) {
   </nav>`
 }
 
-export function tagCloud(ctx: ThemeContext) {
-  const tags = ctx.tags ?? []
+/** Tags by default; categories pass their own list and URL helper. */
+export function tagCloud(
+  ctx: ThemeContext,
+  tags: TagView[] = ctx.tags ?? [],
+  url: (tag: TagView) => string = ctx.helpers.tagUrl,
+) {
   if (tags.length === 0) return html`<p class="empty">${ctx.i18n.t('tag.empty')}</p>`
   return html`<ul class="tag-cloud">
     ${tags.map(
       (tag) => html`<li>
-        <a href="${ctx.helpers.tagUrl(tag)}">${tag.name}<span>${tag.count}</span></a>
+        <a href="${url(tag)}">${tag.name}<span>${tag.count}</span></a>
       </li>`,
     )}
   </ul>`
@@ -92,19 +96,19 @@ export function archiveList(ctx: ThemeContext) {
   return html`<div class="archive-list">
     ${archives.map(
       (group) => html`<section class="archive-year">
-        <h2><a href="${ctx.helpers.url(`/archives/${group.year}/`)}">${group.year}</a><span>${group.posts.length}</span></h2>
+        <h2><a href="${ctx.routes.archives}${group.year}/">${group.year}</a><span>${group.posts.length}</span></h2>
         ${postList(ctx, group.posts)}
       </section>`,
     )}
   </div>`
 }
 
-export function pageHeader(ctx: ThemeContext, extra?: { count?: number }) {
+export function pageHeader(ctx: ThemeContext, extra?: { count?: number; countKey?: string }) {
   return html`<header class="page-header">
     <h1>${ctx.page.title}</h1>
     ${
       extra?.count !== undefined
-        ? html`<p class="page-subtitle">${ctx.i18n.t('page.tagPosts', { count: extra.count })}</p>`
+        ? html`<p class="page-subtitle">${ctx.i18n.t(extra.countKey ?? 'page.tagPosts', { count: extra.count })}</p>`
         : ''
     }
   </header>`

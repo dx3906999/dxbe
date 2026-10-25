@@ -17,6 +17,9 @@ const SELECTORS = [
   ['source[src]', 'src'],
   ['video[src]', 'src'],
   ['audio[src]', 'src'],
+  ['object[data]', 'data'],
+  ['iframe[src]', 'src'],
+  ['embed[src]', 'src'],
 ] as const
 
 async function walk(dir: string, result: string[] = []): Promise<string[]> {
