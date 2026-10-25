@@ -5,6 +5,7 @@ import { runCheckLinks } from './check-links.ts'
 import { runCheckSeo } from './check-seo.ts'
 import { runCheckTheme } from './check-theme.ts'
 import { runClean } from './clean.ts'
+import { runDeploy } from './deploy.ts'
 import { runDev } from './dev.ts'
 import { runNew } from './new.ts'
 import { runIndex } from './pagefind.ts'
@@ -26,6 +27,7 @@ const COMMANDS: Record<string, (argv: string[]) => Promise<void>> = {
   preview: runPreview,
   new: runNew,
   clean: runClean,
+  deploy: runDeploy,
   setup: runSetup,
   index: () => runIndex(),
   check: runCheck,
@@ -55,6 +57,7 @@ Commands:
   check:seo          Check metadata, feeds, and sitemap
   check:theme        Build every theme against the current site
   check:deterministic Compare two builds
+  deploy             Build, check, and push dist/ to deploy.repo (--dry-run, --skip-build)
   smoke              Post-deploy smoke test (BASE_URL required)
 
 Options are command-specific. Run a command after editing site.config.ts.`)

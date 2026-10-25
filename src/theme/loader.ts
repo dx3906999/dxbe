@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { access, copyFile, cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
@@ -248,6 +248,17 @@ export async function copySearchAsset(
   await mkdir(path.dirname(destination), { recursive: true })
   await writeFile(destination, buffer)
   return `${withBase(base, '/assets/search.js')}?v=${hashBuffer(buffer)}`
+}
+
+/** URL of the script that decrypts encrypted posts; content links it before the build copies it. */
+export function unlockScriptUrl(base: string): string {
+  return `${withBase(base, '/assets/unlock.js')}?v=${hashBuffer(readFileSync(engineAsset('unlock.js')))}`
+}
+
+export async function copyUnlockAsset(outDir: string): Promise<void> {
+  const destination = path.join(outDir, 'assets', 'unlock.js')
+  await mkdir(path.dirname(destination), { recursive: true })
+  await copyFile(engineAsset('unlock.js'), destination)
 }
 
 export async function copyKatexAssets(outDir: string, base: string): Promise<string> {

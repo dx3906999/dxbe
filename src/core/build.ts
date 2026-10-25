@@ -8,6 +8,7 @@ import {
   copyPublicAssets,
   copySearchAsset,
   copyThemeAssets,
+  copyUnlockAsset,
   loadTheme,
   writeCname,
 } from '../theme/loader.ts'
@@ -80,6 +81,13 @@ export async function buildSite(loaded: LoadedConfig, options: BuildOptions): Pr
       .flat()
       .some((page) => page.hasMath)
   const katexCss = hasMath ? await copyKatexAssets(workDir, loaded.base) : undefined
+  if (
+    Object.values(content.postsByLang)
+      .flat()
+      .some((post) => post.encrypted)
+  ) {
+    await copyUnlockAsset(workDir)
+  }
   const searchJs = loaded.config.features.search
     ? await copySearchAsset(loaded.root, workDir, loaded.base)
     : undefined
