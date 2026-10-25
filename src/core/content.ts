@@ -44,6 +44,9 @@ const frontmatterSchema = z
     summary: z.string().optional(),
     description: z.string().optional(),
     draft: z.boolean().default(false),
+    /** An image beside the post in lists and above it on its page. */
+    cover: z.string().min(1).optional(),
+    coverAlt: z.string().optional(),
     /** Name of a password in passwords.yml; the body is published encrypted. */
     encrypt: z
       .string()
@@ -279,6 +282,33 @@ function checkDuplicate<T extends { slug: string; translationKey: string; source
   }
 }
 
+const ABSOLUTE_URL = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i
+
+/**
+ * A cover is an absolute URL, a site path (a file in public/), or a file in
+ * the post's own directory, which is copied next to the post's index.html.
+ */
+export function resolveCover(
+  cover: string,
+  postUrl: string,
+  assetFiles: string[],
+  hasAssetDir: boolean,
+  file: string,
+): string {
+  if (ABSOLUTE_URL.test(cover) || cover.startsWith('/')) return cover
+  const relative = path.posix.normalize(cover.replace(/^\.\//, ''))
+  if (!hasAssetDir || relative.startsWith('../') || !assetFiles.includes(relative)) {
+    throw new BuildError(`Cover image "${cover}" was not found`, {
+      code: 'CONTENT',
+      file,
+      hint: hasAssetDir
+        ? 'put the image next to index.md, or use a site path like /images/cover.jpg'
+        : 'move the post into a folder (posts/<slug>/index.md) and put the image beside it',
+    })
+  }
+  return `${postUrl}${relative.split('/').map(encodeURIComponent).join('/')}`
+}
+
 async function buildPost(
   loaded: LoadedConfig,
   lang: string,
@@ -345,6 +375,20 @@ async function buildPost(
     summary = frontmatter.summary?.trim() || lockedSummary(lang)
   }
 
+  const url = postPath(lang, loaded.config.locales.default, slug)
+  const cover = frontmatter.cover
+    ? {
+        url: resolveCover(
+          frontmatter.cover,
+          url,
+          assetFiles,
+          Boolean(entry.assetDir),
+          relativeFile,
+        ),
+        alt: frontmatter.coverAlt?.trim() ?? '',
+      }
+    : undefined
+
   return {
     lang,
     slug,
@@ -358,7 +402,8 @@ async function buildPost(
     summary,
     draft: frontmatter.draft,
     encrypted: Boolean(frontmatter.encrypt),
-    url: postPath(lang, loaded.config.locales.default, slug),
+    cover,
+    url,
     html: raw(html),
     toc,
     hasMath: rendered.hasMath,

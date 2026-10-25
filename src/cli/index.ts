@@ -7,6 +7,7 @@ import { runCheckTheme } from './check-theme.ts'
 import { runClean } from './clean.ts'
 import { runDeploy } from './deploy.ts'
 import { runDev } from './dev.ts'
+import { commandHelp, generalHelp, isHelpFlag, version } from './help.ts'
 import { runNew } from './new.ts'
 import { runIndex } from './pagefind.ts'
 import { runPreview } from './preview.ts'
@@ -38,43 +39,39 @@ const COMMANDS: Record<string, (argv: string[]) => Promise<void>> = {
   smoke: runSmoke,
 }
 
-function printHelp(): void {
-  console.log(`dxbe
-
-Usage:
-  dxbe <command> [options]
-
-Commands:
-  build              Build the site into dist/
-  dev                Start a development server
-  preview            Serve an existing dist/
-  new                Create a post scaffold
-  clean              Remove generated directories
-  setup              Create or update site.config.ts
-  index              Build the Pagefind index into dist/pagefind/
-  check              Build, check links/SEO/themes, and build the index
-  check:links        Check internal links in dist/
-  check:seo          Check metadata, feeds, and sitemap
-  check:theme        Build every theme against the current site
-  check:deterministic Compare two builds
-  deploy             Build, check, and push dist/ to deploy.repo (--dry-run, --skip-build)
-  smoke              Post-deploy smoke test (BASE_URL required)
-
-Options are command-specific. Run a command after editing site.config.ts.`)
-}
-
 async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2)
-  if (!command || command === '--help' || command === '-h' || command === 'help') {
-    printHelp()
+  if (!command || isHelpFlag(command)) {
+    console.log(generalHelp())
+    return
+  }
+  if (command === '--version' || command === '-v') {
+    console.log(version())
+    return
+  }
+  if (command === 'help') {
+    const topic = args[0]
+    const help = topic ? commandHelp(topic) : generalHelp()
+    if (!help) {
+      console.error(`Unknown command "${topic}"
+`)
+      console.log(generalHelp())
+      process.exit(1)
+    }
+    console.log(help)
     return
   }
 
   const runner = COMMANDS[command]
   if (!runner) {
-    console.error(`Unknown command "${command}"`)
-    printHelp()
+    console.error(`Unknown command "${command}"
+`)
+    console.log(generalHelp())
     process.exit(1)
+  }
+  if (args.some(isHelpFlag)) {
+    console.log(commandHelp(command))
+    return
   }
 
   await runner(args)

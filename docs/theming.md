@@ -82,6 +82,7 @@ type LayoutFn = (ctx: ThemeContext) => string | SafeHtml
 - `ctx.page`：`{ kind, title }`，kind 是 `index | home | post | page | publications | archive | tag | tags | category | categories | search | notFound`
 - `ctx.post` / `ctx.pageItem`：当前文章或页面
 - `ctx.posts`：列表页的文章
+- `post.cover`：可选的封面 `{ url, alt }`。`url` 是站点路径或完整地址，用 `ctx.helpers.url(post.cover.url)` 输出（站点路径会加 base，完整地址原样返回）。文章页有封面时 `ctx.seo.image` 是它的绝对地址，主题在 `<head>` 里输出 `og:image`
 - `ctx.tag` / `ctx.tags` / `ctx.category` / `ctx.categories` / `ctx.archives` / `ctx.pagination`
 - `ctx.pageItem.publications`：publications 页的结构化条目（`title`、`authors`、`venue`、`year`、`type`、`note`、`links`）
 - `ctx.routes`：当前语言各栏目的地址（已含 base）：`home`、`posts`、`archives`、`tags`、`categories`，以及开启时的 `search`、`publications`。`routes.posts === routes.home` 说明首页就是文章列表

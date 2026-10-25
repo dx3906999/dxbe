@@ -1,7 +1,7 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { getFolioConfig } from '../config.ts'
 import { baseLayout } from './base.ts'
-import { postMeta, prevNext, tagLinks } from './components.ts'
+import { postCover, postMeta, prevNext, tagLinks } from './components.ts'
 
 export const post: LayoutFn = (ctx) => {
   const post = ctx.post
@@ -21,6 +21,7 @@ export const post: LayoutFn = (ctx) => {
         ${postMeta(ctx, post)}
         ${tagLinks(ctx, post.tags)}
       </header>
+      ${postCover(ctx, post)}
       ${
         hasToc
           ? html`<details class="toc-mobile">

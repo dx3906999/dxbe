@@ -6,6 +6,7 @@ categories: [Engineering]
 slug: encrypted-notes
 translationKey: encrypted-notes
 summary: A demo of an encrypted post. The password is dxbe-demo.
+cover: cover.svg
 encrypt: demo
 ---
 

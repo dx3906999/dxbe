@@ -32,6 +32,12 @@ export interface PostRef {
   url: string
 }
 
+/** A list and header image. `url` is a site path (base not applied) or an absolute URL. */
+export interface PostCover {
+  url: string
+  alt: string
+}
+
 export interface Post {
   lang: string
   slug: string
@@ -46,6 +52,7 @@ export interface Post {
   draft: boolean
   /** The body is ciphertext behind a password form; themes may mark it in lists. */
   encrypted: boolean
+  cover?: PostCover
   url: string
   html: SafeHtml
   toc: TocEntry[]

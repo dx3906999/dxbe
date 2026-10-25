@@ -73,7 +73,7 @@ export function baseLayout(ctx: ThemeContext, content: SafeHtml): SafeHtml {
     <meta property="og:url" content="${ctx.seo.canonical}">
     <meta property="og:site_name" content="${ctx.site.title}">
     <meta property="og:locale" content="${ctx.i18n.lang}">
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="${ctx.seo.image ? 'summary_large_image' : 'summary'}">
     <meta name="twitter:title" content="${ctx.seo.title}">
     <meta name="twitter:description" content="${ctx.seo.description}">
     ${ctx.seo.image ? html`<meta property="og:image" content="${ctx.seo.image}">` : ''}

@@ -192,6 +192,19 @@ function renderToc(task: RenderTask, t: Translator): SafeHtml {
 </nav>`
 }
 
+const ABSOLUTE_URL = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i
+
+/** Site paths get the base; absolute URLs (a cover on a CDN) pass through. */
+function siteUrl(base: string, pathname: string): string {
+  return ABSOLUTE_URL.test(pathname) ? pathname : withBase(base, pathname)
+}
+
+function coverImage(task: RenderTask, loaded: LoadedConfig): string | undefined {
+  const cover = task.kind === 'post' ? task.post?.cover : undefined
+  if (!cover) return undefined
+  return new URL(siteUrl(loaded.base, cover.url), loaded.url).toString()
+}
+
 function buildJsonLd(
   task: RenderTask,
   loaded: LoadedConfig,
@@ -220,6 +233,7 @@ function buildJsonLd(
       mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
       url: canonical,
       keywords: task.post.tags.join(', ') || undefined,
+      image: coverImage(task, loaded),
     }
   } else if (task.kind === 'home' && task.pageItem) {
     data = {
@@ -306,6 +320,7 @@ function buildSeo(
       ? makeAbsoluteUrl(loaded.url, loaded.base, defaultAlternate.url)
       : canonical,
     ogType: task.kind === 'post' ? 'article' : 'website',
+    image: coverImage(task, loaded),
     robots: task.noindex ? 'noindex,follow' : undefined,
     jsonLd: buildJsonLd(task, loaded, task.lang, canonical, description),
     publishedTime,
@@ -368,7 +383,7 @@ function buildContext(
   }
 
   const helpers = {
-    url: (pathname: string) => withBase(loaded.base, pathname),
+    url: (pathname: string) => siteUrl(loaded.base, pathname),
     absoluteUrl: (pathname: string) => makeAbsoluteUrl(loaded.url, loaded.base, pathname),
     asset: (assetPath: string) => {
       const normalized = assetPath.replace(/^\/+/, '')

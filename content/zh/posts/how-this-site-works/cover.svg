@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2ead8"/>
+      <stop offset="1" stop-color="#ddd0b3"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#8a2f2f" stroke-opacity="0.12"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <g stroke="#1b1916" stroke-width="3">
+    <rect x="150" y="150" width="240" height="170" fill="#fbf7ee"/>
+    <rect x="280" y="210" width="240" height="170" fill="#fbf7ee"/>
+    <rect x="410" y="120" width="240" height="170" fill="#8a2f2f"/>
+  </g>
+  <g stroke="#1b1916" stroke-width="3" stroke-linecap="round">
+    <path d="M175 190h150M175 215h120M175 240h135"/>
+    <path d="M305 250h170M305 275h140M305 300h160M305 325h110"/>
+  </g>
+  <g stroke="#f2ead8" stroke-width="3" stroke-linecap="round">
+    <path d="M440 160h120M440 185h170M440 210h90"/>
+  </g>
+  <path d="M120 420h560" stroke="#1b1916" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/>
+</svg>

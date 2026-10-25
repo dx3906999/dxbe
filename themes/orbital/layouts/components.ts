@@ -8,11 +8,14 @@ export function tagLinks(ctx: ThemeContext, tags: string[]) {
   </span>`
 }
 
+/** Archive lists stay compact; every other list shows covers. */
 export function postList(ctx: ThemeContext, posts: Post[]) {
   if (posts.length === 0) return html`<p class="empty">${ctx.i18n.t('post.empty')}</p>`
+  const covers = ctx.page.kind !== 'archive'
   return html`<ol class="index-list">
-    ${posts.map(
-      (post, index) => html`<li class="index-row">
+    ${posts.map((post, index) => {
+      const cover = covers ? post.cover : undefined
+      return html`<li class="index-row${cover ? ' has-cover' : ''}">
         <span class="index-num">${String(index + 1).padStart(2, '0')}</span>
         <time class="index-date" datetime="${post.date}">${ctx.helpers.date(post.date, 'short')}</time>
         <a class="index-title" href="${ctx.helpers.postUrl(post)}">${post.title}</a>
@@ -20,9 +23,22 @@ export function postList(ctx: ThemeContext, posts: Post[]) {
           (tag, tagIndex) =>
             html`${tagIndex > 0 ? ' / ' : ''}<a href="${ctx.helpers.tagUrlByName(tag)}">${tag}</a>`,
         )}</span>
-      </li>`,
-    )}
+        ${
+          cover
+            ? html`<a class="index-thumb" href="${ctx.helpers.postUrl(post)}" tabindex="-1" aria-hidden="true"><img src="${ctx.helpers.url(cover.url)}" alt="" loading="lazy" decoding="async"></a>`
+            : ''
+        }
+      </li>`
+    })}
   </ol>`
+}
+
+/** The cover above a post body; empty when the post has none. */
+export function postCover(ctx: ThemeContext, post: Post) {
+  if (!post.cover) return html``
+  return html`<figure class="orbital-cover">
+    <img src="${ctx.helpers.url(post.cover.url)}" alt="${post.cover.alt}" decoding="async">
+  </figure>`
 }
 
 export function pagination(ctx: ThemeContext) {

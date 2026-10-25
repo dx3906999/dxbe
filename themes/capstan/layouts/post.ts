@@ -40,6 +40,7 @@ export const post: LayoutFn = (ctx) => {
             : ''
         }
       </dl>
+      ${entry.cover ? html`<figure class="cp-ticket__cover"><img src="${url(entry.cover.url)}" alt="${entry.cover.alt}" decoding="async"></figure>` : ''}
       <h1 class="cp-ticket__title">${entry.title}</h1>
       ${entry.summary ? html`<p class="cp-ticket__sum">${entry.summary}</p>` : ''}
     </header>
