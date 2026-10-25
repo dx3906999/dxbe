@@ -8,7 +8,7 @@
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.7.0/dxbe-0.7.0.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.8.0/dxbe-0.8.0.tgz
 npx dxbe setup
 npx dxbe dev
 ```

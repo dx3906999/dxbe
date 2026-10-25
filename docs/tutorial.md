@@ -2,8 +2,6 @@
 
 这篇教程从一个空目录开始，最后得到一个在 GitHub Pages 上运行的博客，并说明之后每次写文章、发布要做什么。每一步都可以直接复制命令。更细的字段说明分别在 [authoring.md](authoring.md)（写作）、[customization.md](customization.md)（配置）和 [deployment.md](deployment.md)（部署）。
 
-> 文章封面（`cover`）和逐命令帮助（`dxbe help <命令>`）是 0.7.0 之后加入的；安装时把下文命令里的 `0.7.0` 换成 [Releases](https://github.com/dx3906999/dxbe/releases) 里的最新版本。
-
 忘了某个命令怎么用时，随时可以看命令行帮助：
 
 ```bash
@@ -24,7 +22,7 @@ mkdir my-blog
 cd my-blog
 git init
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.7.0/dxbe-0.7.0.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.8.0/dxbe-0.8.0.tgz
 npx dxbe setup
 ```
 
@@ -225,7 +223,7 @@ coverAlt: 公生和薰的海报
 
    ```bash
    mkdir -p .github/workflows
-   curl -fsSL -o .github/workflows/deploy.yml https://raw.githubusercontent.com/dx3906999/dxbe/v0.7.0/templates/deploy.yml
+   curl -fsSL -o .github/workflows/deploy.yml https://raw.githubusercontent.com/dx3906999/dxbe/v0.8.0/templates/deploy.yml
    ```
 
    没有 `curl` 时，在浏览器打开这个地址，把内容保存成 `.github/workflows/deploy.yml`。
