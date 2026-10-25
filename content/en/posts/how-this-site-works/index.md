@@ -6,6 +6,7 @@ categories: [Engineering]
 slug: how-this-site-works
 translationKey: how-this-site-works
 summary: "The build path behind this blog: Node, Markdown, a theme contract, and GitHub Pages."
+cover: cover.svg
 ---
 
 This site does not use an off-the-shelf blog framework. The generator lives in the repository, content lives in `content/`, and themes live in `themes/`.

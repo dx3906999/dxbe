@@ -1,7 +1,7 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { getScholarConfig } from '../config.ts'
 import { baseLayout } from './base.ts'
-import { byline, prevNext, tagLinks } from './components.ts'
+import { byline, postCover, prevNext, tagLinks } from './components.ts'
 
 export const post: LayoutFn = (ctx) => {
   const post = ctx.post
@@ -21,6 +21,7 @@ export const post: LayoutFn = (ctx) => {
         <h1>${post.title}</h1>
         ${byline(ctx, post)}
       </header>
+      ${postCover(ctx, post)}
       <section class="scholar-abstract" aria-labelledby="abstract-title">
         <h2 id="abstract-title">${ctx.i18n.t('page.abstract')}</h2>
         <p>${post.summary}</p>

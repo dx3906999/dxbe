@@ -12,6 +12,7 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 - 五套完整主题：`folio`（编辑排版）、`orbital`（复古未来主义）、`scholar`（学术）、`apogee`（NASA punk）、`capstan`（磁带未来主义）
 - 站点身份、语言、导航、域名、许可证、主题全部在 `site.config.ts`
 - Markdown + YAML frontmatter，构建时渲染，客户端零框架
+- 文章封面：frontmatter 写 `cover: cover.jpg`，列表里图文并排、文章页顶部大图，同时作为分享预览图
 - 加密文章：frontmatter 写 `encrypt: <密码名>`，正文在构建时用 AES-256-GCM 加密，读者输入密码后在浏览器里解密
 - `dxbe deploy` 一条命令构建并推送到 GitHub Pages 仓库，源码仓库可以私有；也可以用 GitHub Actions 部署
 - 文章目录里的图片、PDF 等附件随文章发布；单独一行的 `![标题](paper.pdf)` 渲染成内嵌 PDF 阅读器 + 链接
@@ -34,6 +35,8 @@ npm install https://github.com/dx3906999/dxbe/releases/download/v0.7.0/dxbe-0.7.
 npx dxbe setup
 npx dxbe dev
 ```
+
+第一次用？[docs/tutorial.md](docs/tutorial.md) 从建仓库、部署到写文章、发布一步步走完。命令行里 `npx dxbe help` 列出所有命令，`npx dxbe <命令> --help` 显示参数和例子。
 
 发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.7.0`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
 
@@ -93,6 +96,8 @@ package.json
 | `dxbe setup` | 交互式生成或更新 `site.config.ts` |
 | `dxbe deploy` | 生产构建、检查，并把 `dist/` 推到 `deploy.repo`（`--dry-run` 只提交不推送） |
 | `dxbe smoke` | 部署后冒烟测试，需要 `BASE_URL` |
+| `dxbe help [命令]` | 列出命令，或显示某个命令的参数和例子（也可以 `dxbe <命令> --help`） |
+| `dxbe --version` | 显示 dxbe 版本 |
 
 生产预览：
 
@@ -171,6 +176,7 @@ categories: [工程实践]
 slug: how-this-site-works
 translationKey: how-this-site-works
 summary: 可选的摘要
+cover: cover.jpg   # 可选的封面图
 draft: false
 ---
 ```

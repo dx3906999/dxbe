@@ -6,6 +6,7 @@ categories: [工程实践]
 slug: encrypted-notes
 translationKey: encrypted-notes
 summary: 演示用的加密文章，密码是 dxbe-demo。
+cover: cover.svg
 encrypt: demo
 ---
 

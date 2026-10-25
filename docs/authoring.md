@@ -21,6 +21,21 @@ content/
 
 页面也可以写成目录形式（`pages/about/index.md`），同样会复制同目录文件。
 
+## 封面
+
+frontmatter 写 `cover`，主题会在文章列表里把这张图放在标题旁边，在文章页顶部显示，并把它作为 `og:image` 分享图：
+
+```yaml
+cover: cover.jpg          # 文章目录里的文件
+coverAlt: 封面图的描述     # 可选，文章页图片的替代文字
+```
+
+- 文章目录里的文件（`cover.jpg`、`images/cover.jpg`）会随文章发布；找不到时构建失败。文章必须是 `posts/<slug>/index.md` 的目录形式。
+- 也可以写站点路径（`/images/cover.jpg`，即 `public/images/cover.jpg`，项目页部署会自动加 `base`）或完整的 `https://` 地址。
+- 列表里的封面是装饰性的（`alt=""`），标题就在旁边；`coverAlt` 只用于文章页。
+- 归档页保持紧凑，不显示封面。加密文章的封面和标题一样公开。
+- 横图效果最好，建议宽 1200px 左右；列表按主题裁切成固定比例。
+
 ## PDF
 
 PDF 和图片一样放在文章目录里：
@@ -87,6 +102,7 @@ categories: [工程实践]
 slug: how-this-site-works
 translationKey: how-this-site-works
 summary: 可选的摘要
+cover: cover.jpg
 draft: false
 ---
 ```
@@ -101,6 +117,8 @@ draft: false
 | `slug` | 否 | 默认取目录名；小写 ASCII、数字、连字符 |
 | `translationKey` | 否 | 译文关联键，默认等于 slug |
 | `summary` | 否 | 摘要；缺省从正文第一段提取 |
+| `cover` | 否 | 封面图：文章目录里的文件、站点路径或 `https://` 地址 |
+| `coverAlt` | 否 | 封面在文章页的替代文字 |
 | `draft` | 否 | `true` 时只在开发模式出现 |
 
 页面（`pages/`）的 frontmatter 用 `description` 代替 `summary`，`date` 可选。

@@ -19,6 +19,7 @@ export type {
   PageKind,
   Pagination,
   Post,
+  PostCover,
   Publication,
   PublicationLink,
   TagView,
@@ -83,6 +84,7 @@ export interface ThemeAssets {
 }
 
 export interface ThemeHelpers {
+  /** Adds the site base to a site path; absolute URLs are returned unchanged. */
   url: (path: string) => string
   absoluteUrl: (path: string) => string
   asset: (path: string) => string

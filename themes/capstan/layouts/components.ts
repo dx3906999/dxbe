@@ -70,7 +70,10 @@ export function tagKeys(ctx: ThemeContext, tags: string[]): SafeHtml {
 
 export function entry(ctx: ThemeContext, post: Post): SafeHtml {
   const config = getCapstanConfig(ctx)
-  return html`<article class="cp-entry">
+  // archive lists stay compact
+  const cover = ctx.page.kind === 'archive' ? undefined : post.cover
+  return html`<article class="cp-entry${cover ? ' cp-entry--cover' : ''}">
+    ${cover ? html`<div class="cp-entry__cover" aria-hidden="true"><img src="${ctx.helpers.url(cover.url)}" alt="" loading="lazy" decoding="async"></div>` : ''}
     <div class="cp-entry__line">
       <span class="cp-entry__code">${jobCode(ctx, post.date)}</span>
       <h2 class="cp-entry__title"><a href="${ctx.helpers.postUrl(post)}">${post.title}</a></h2>

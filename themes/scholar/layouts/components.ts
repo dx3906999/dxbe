@@ -33,8 +33,10 @@ export function articleList(
   if (posts.length === 0) return html`<p class="empty">${ctx.i18n.t('post.empty')}</p>`
   const showAbstract = options.abstract ?? true
   return html`<ol class="article-list">
-    ${posts.map(
-      (post) => html`<li class="article-item">
+    ${posts.map((post) => {
+      // compact lists (no abstract) skip the cover too
+      const cover = showAbstract ? post.cover : undefined
+      return html`<li class="article-item${cover ? ' has-cover' : ''}">
         <div class="article-number" aria-hidden="true"></div>
         <div class="article-main">
           <h2><a href="${ctx.helpers.postUrl(post)}">${post.title}</a></h2>
@@ -46,9 +48,22 @@ export function articleList(
               : ''
           }
         </div>
-      </li>`,
-    )}
+        ${
+          cover
+            ? html`<a class="article-thumb" href="${ctx.helpers.postUrl(post)}" tabindex="-1" aria-hidden="true"><img src="${ctx.helpers.url(cover.url)}" alt="" loading="lazy" decoding="async"></a>`
+            : ''
+        }
+      </li>`
+    })}
   </ol>`
+}
+
+/** The cover as the article's lead figure; empty when the post has none. */
+export function postCover(ctx: ThemeContext, post: Post) {
+  if (!post.cover) return html``
+  return html`<figure class="scholar-cover">
+    <img src="${ctx.helpers.url(post.cover.url)}" alt="${post.cover.alt}" decoding="async">
+  </figure>`
 }
 
 export function pagination(ctx: ThemeContext) {

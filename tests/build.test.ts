@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { type BuildResult, buildSite } from '../src/core/build.ts'
 import { type LoadedConfig, loadConfig } from '../src/core/config.ts'
 import { Logger } from '../src/shared/logger.ts'
-import { absoluteUrl } from '../src/shared/url.ts'
+import { absoluteUrl, withBase } from '../src/shared/url.ts'
 
 const root = process.cwd()
 const outDir = '.test-dist'
@@ -116,6 +116,22 @@ describe('site build', () => {
     const atom = await readFile(path.join(root, outDir, 'atom.xml'), 'utf8')
     const entry = atom.slice(atom.indexOf('/posts/encrypted-notes/'))
     expect(entry.slice(0, entry.indexOf('</entry>'))).not.toContain('<content')
+  })
+
+  it('shows post covers in lists, on the post, and as the share image', async () => {
+    const post = result.tasks.find((task) => task.kind === 'post' && task.post?.cover)?.post
+    expect(post?.cover?.url).toBe(`${post?.url}cover.svg`)
+    const dir = path.join(root, outDir, 'posts', post?.slug ?? '')
+    await expect(access(path.join(dir, 'cover.svg'))).resolves.toBeUndefined()
+    const html = await readFile(path.join(dir, 'index.html'), 'utf8')
+    const image = absoluteUrl(loaded.url, loaded.base, post?.cover?.url ?? '')
+    expect(html).toContain(`<meta property="og:image" content="${image}">`)
+    expect(html).toContain('class="post-cover"')
+    const list = await readFile(path.join(root, outDir, 'posts', 'index.html'), 'utf8')
+    expect(list).toContain(`<img src="${withBase(loaded.base, post?.cover?.url ?? '')}" alt=""`)
+    // archives stay a compact list
+    const archive = await readFile(path.join(root, outDir, 'archives', 'index.html'), 'utf8')
+    expect(archive).not.toContain('post-thumb')
   })
 
   it('gives feed entries a base so relative asset links resolve', async () => {

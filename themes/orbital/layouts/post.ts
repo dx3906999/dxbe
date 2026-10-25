@@ -1,7 +1,7 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { getOrbitalConfig } from '../config.ts'
 import { baseLayout } from './base.ts'
-import { postMeta, prevNext } from './components.ts'
+import { postCover, postMeta, prevNext } from './components.ts'
 
 export const post: LayoutFn = (ctx) => {
   const post = ctx.post
@@ -21,6 +21,7 @@ export const post: LayoutFn = (ctx) => {
         <h1>${post.title}</h1>
         ${postMeta(ctx, post)}
       </header>
+      ${postCover(ctx, post)}
       ${
         hasToc
           ? html`<section class="orbital-toc">

@@ -33,6 +33,7 @@ export const post: LayoutFn = (ctx) => {
         <span class="ap-label ap-label--dim">STA ${stationCode(entry.slug)}</span>
         <span class="ap-hazard" aria-hidden="true"></span>
       </div>
+      ${entry.cover ? html`<figure class="ap-dossier__cover"><img src="${url(entry.cover.url)}" alt="${entry.cover.alt}" decoding="async"></figure>` : ''}
       <h1 class="ap-dossier__title">${entry.title}</h1>
       ${entry.summary ? html`<p class="ap-dossier__sum">${entry.summary}</p>` : ''}
       <dl class="ap-spec">

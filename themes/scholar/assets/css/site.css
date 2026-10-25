@@ -275,6 +275,27 @@ video {
   border-bottom: 1px solid var(--rule);
 }
 
+.article-item.has-cover {
+  grid-template-columns: 2.2rem minmax(0, 1fr) 9rem;
+}
+
+.article-thumb {
+  display: block;
+  align-self: start;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  margin: 0.3rem 0 0 0.6rem;
+  border: 1px solid var(--rule);
+  background: var(--wash);
+}
+
+.article-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .article-number::before {
   counter-increment: article;
   content: counter(article) ".";
@@ -362,6 +383,19 @@ video {
 
 .scholar-title .scholar-byline {
   margin: 0;
+}
+
+.scholar-cover {
+  max-width: 40rem;
+  margin: 0 auto 2rem;
+}
+
+.scholar-cover img {
+  display: block;
+  width: 100%;
+  max-height: 24rem;
+  object-fit: cover;
+  border: 1px solid var(--rule);
 }
 
 .scholar-abstract {
@@ -902,6 +936,14 @@ html[data-theme="dark"] .shiki span {
   .article-item {
     grid-template-columns: 1.6rem minmax(0, 1fr);
     gap: 0.5rem;
+  }
+
+  .article-item.has-cover {
+    grid-template-columns: 1.6rem minmax(0, 1fr) 5.5rem;
+  }
+
+  .article-thumb {
+    margin-left: 0.3rem;
   }
 
   .scholar-prev-next {

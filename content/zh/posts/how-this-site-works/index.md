@@ -6,6 +6,7 @@ categories: [工程实践]
 slug: how-this-site-works
 translationKey: how-this-site-works
 summary: 记录这个博客的构建方式：Node、Markdown、主题契约和 GitHub Pages。
+cover: cover.svg
 ---
 
 这个站点没有用现成的博客框架。生成器在仓库里，内容在 `content/`，主题在 `themes/`。
