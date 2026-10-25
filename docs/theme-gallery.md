@@ -4,7 +4,7 @@
 
 ## folio
 
-独立杂志 / 文学期刊。衬线正文、大留白、细规则线，右侧目录。
+独立杂志 / 文学期刊。衬线正文、大留白、细规则线。左侧导航栏、顶栏面包屑和搜索、右侧目录与最近文章栏，布局与 apogee / capstan 一致。
 
 ![folio 首页](screenshots/folio-home.png)
 
@@ -28,7 +28,7 @@
 
 ## scholar
 
-期刊论文 / 学位论文。摘要、编号章节、左侧目录、正文衬线。
+期刊论文 / 学位论文。摘要、编号章节、正文衬线。刊头和导航在左侧栏，目录、最近文章和关键词在右侧栏，布局与 apogee / capstan 一致。
 
 ![scholar 首页](screenshots/scholar-home.png)
 

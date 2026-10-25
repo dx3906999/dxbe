@@ -1,5 +1,6 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { baseLayout } from './base.ts'
+import { tocModule } from './components.ts'
 
 export const page: LayoutFn = (ctx) => {
   const page = ctx.pageItem
@@ -18,5 +19,6 @@ export const page: LayoutFn = (ctx) => {
         ${page.html}
       </div>
     </article>`,
+    { panel: tocModule(ctx) },
   )
 }

@@ -1,7 +1,7 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { getScholarConfig } from '../config.ts'
 import { baseLayout } from './base.ts'
-import { byline, postCover, prevNext, tagLinks } from './components.ts'
+import { byline, keywordModule, postCover, prevNext, tagLinks, tocModule } from './components.ts'
 
 export const post: LayoutFn = (ctx) => {
   const post = ctx.post
@@ -39,13 +39,16 @@ export const post: LayoutFn = (ctx) => {
           </details>`
           : ''
       }
-      <div class="scholar-layout ${hasToc ? '' : 'no-toc'}">
-        ${hasToc ? html`<aside class="scholar-toc">${ctx.tocHtml}</aside>` : ''}
+      <div class="scholar-layout">
         <div class="scholar-body">
           ${post.html}
         </div>
       </div>
       ${prevNext(ctx)}
     </article>`,
+    {
+      panel: html`${tocModule(ctx)}${keywordModule(ctx, post.tags)}`,
+      crumb: html`<a href="${ctx.routes.posts}">${ctx.i18n.t('nav.posts')}</a><span class="scholar-crumb-sep" aria-hidden="true">/</span><span aria-current="page">${post.title}</span>`,
+    },
   )
 }

@@ -1,7 +1,7 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { getFolioConfig } from '../config.ts'
 import { baseLayout } from './base.ts'
-import { postCover, postMeta, prevNext, tagLinks } from './components.ts'
+import { postCover, postMeta, prevNext, tagLinks, tagModule, tocModule } from './components.ts'
 
 export const post: LayoutFn = (ctx) => {
   const post = ctx.post
@@ -30,13 +30,16 @@ export const post: LayoutFn = (ctx) => {
           </details>`
           : ''
       }
-      <div class="post-layout${hasToc ? '' : ' no-toc'}">
+      <div class="post-layout">
         <div class="post-body">
           ${post.html}
         </div>
-        ${hasToc ? html`<aside class="post-aside">${ctx.tocHtml}</aside>` : ''}
       </div>
       ${prevNext(ctx)}
     </article>`,
+    {
+      panel: html`${tocModule(ctx)}${tagModule(ctx, post.tags)}`,
+      crumb: html`<a href="${ctx.routes.posts}">${ctx.i18n.t('nav.posts')}</a><span class="crumb-sep" aria-hidden="true">/</span><span aria-current="page">${post.title}</span>`,
+    },
   )
 }

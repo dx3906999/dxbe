@@ -33,14 +33,115 @@ function themeInitScript(): SafeHtml {
 </script>`)
 }
 
-export function baseLayout(ctx: ThemeContext, content: SafeHtml): SafeHtml {
+export interface BaseOptions {
+  /** Right-hand column: contents, recent articles, index terms. */
+  panel?: SafeHtml
+  /** Breadcrumb after the home link; defaults to the page title. */
+  crumb?: SafeHtml
+}
+
+function rail(ctx: ThemeContext): SafeHtml {
   const t = ctx.i18n.t
-  const home = homeUrl(ctx)
   const languageLinks = ctx.i18n.alternates.filter((alternate) => alternate.lang !== ctx.i18n.lang)
-  const hasSearch = Boolean(ctx.assets.searchJs)
+  return html`<aside class="scholar-rail" id="scholar-rail" aria-label="${t('nav.label')}">
+    <div class="scholar-rail-inner">
+      <div class="masthead">
+        ${ctx.site.tagline ? html`<p class="masthead-label">${ctx.site.tagline}</p>` : ''}
+        <a class="masthead-title" href="${homeUrl(ctx)}">${ctx.site.title}</a>
+        <p class="masthead-description">${ctx.site.description}</p>
+      </div>
+      <div class="masthead-rule" aria-hidden="true"></div>
+      <nav class="scholar-nav" aria-label="${t('nav.label')}">
+        ${ctx.nav.map(
+          (item) =>
+            html`<a href="${item.url}" aria-current="${item.current ? 'page' : 'false'}">${item.label}</a>`,
+        )}
+      </nav>
+      <div class="scholar-rail-foot">
+        <div class="scholar-tools">
+          ${
+            languageLinks.length > 0
+              ? html`<nav class="scholar-language" aria-label="${t('language.switch')}">
+                ${languageLinks.map(
+                  (alternate) =>
+                    html`<a href="${ctx.helpers.url(alternate.url)}" data-language="${alternate.lang}" lang="${alternate.lang}" hreflang="${alternate.lang}">${alternate.label}</a>`,
+                )}
+              </nav>`
+              : ''
+          }
+          <button class="scholar-toggle" type="button" data-theme-toggle aria-label="${t('theme.toggle')}">
+            ${t('theme.toggle')}
+          </button>
+        </div>
+        <p class="scholar-rail-links">
+          ${ctx.site.social.map(
+            (social) =>
+              html`<a href="${social.url.startsWith('/') ? ctx.helpers.url(social.url) : social.url}" rel="noopener">${social.label}</a>`,
+          )}
+          <a href="${atomUrl(ctx)}">${t('footer.rss')}</a>
+        </p>
+      </div>
+    </div>
+  </aside>`
+}
+
+function topbar(ctx: ThemeContext, crumb: SafeHtml | undefined): SafeHtml {
+  const t = ctx.i18n.t
+  const atHome =
+    ctx.page.kind === 'home' ||
+    (ctx.page.kind === 'index' && ctx.routes.posts === ctx.routes.home && !ctx.pagination?.prevUrl)
+  const current = atHome ? '' : ctx.page.title
+  return html`<header class="scholar-top">
+    <button class="scholar-menu" type="button" data-rail-toggle aria-controls="scholar-rail" aria-expanded="false" aria-label="${t('a11y.menu')}">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="scholar-crumb" aria-label="${t('a11y.breadcrumb')}">
+      <a href="${homeUrl(ctx)}">${t('nav.home')}</a>
+      ${
+        crumb
+          ? html`<span class="scholar-crumb-sep" aria-hidden="true">/</span>${crumb}`
+          : current
+            ? html`<span class="scholar-crumb-sep" aria-hidden="true">/</span><span aria-current="page">${current}</span>`
+            : ''
+      }
+    </nav>
+    ${
+      ctx.assets.searchJs && ctx.page.kind !== 'search'
+        ? html`<form class="scholar-query" action="${searchUrl(ctx)}" method="get" role="search">
+          <label class="visually-hidden" for="scholar-q">${t('nav.search')}</label>
+          <input id="scholar-q" name="q" type="search" placeholder="${t('search.placeholder')}" autocomplete="off">
+        </form>`
+        : ''
+    }
+    <div class="scholar-progress" aria-hidden="true"><span data-progress></span></div>
+  </header>`
+}
+
+function footer(ctx: ThemeContext): SafeHtml {
+  const t = ctx.i18n.t
   const repositoryUrl = ctx.site.repository
     ? `https://github.com/${ctx.site.repository.owner}/${ctx.site.repository.name}`
     : undefined
+  return html`<footer class="scholar-footer">
+    <p>${
+      ctx.site.author.url
+        ? html`<a href="${ctx.site.author.url}" rel="noopener">${ctx.site.author.name}</a>`
+        : ctx.site.author.name
+    }</p>
+    <p>
+      ${t('footer.license')}: ${ctx.site.license.code} / ${ctx.site.license.content}
+      ${repositoryUrl ? html`<a href="${repositoryUrl}" rel="noopener">${t('footer.source')}</a>` : ''}
+    </p>
+  </footer>`
+}
+
+export function baseLayout(
+  ctx: ThemeContext,
+  content: SafeHtml,
+  options: BaseOptions = {},
+): SafeHtml {
+  const t = ctx.i18n.t
+  const hasPanel = Boolean(options.panel?.value)
 
   return html`<!doctype html>
 <html lang="${ctx.i18n.lang}" data-theme="auto">
@@ -91,73 +192,22 @@ export function baseLayout(ctx: ThemeContext, content: SafeHtml): SafeHtml {
     ${themeInitScript()}
     ${languageBootstrap(ctx)}
   </head>
-  <body class="page-${ctx.page.kind}">
+  <body class="page-${ctx.page.kind}${hasPanel ? ' has-panel' : ''}">
     <a class="skip-link" href="#main">${t('a11y.skip')}</a>
-    <header class="scholar-header">
-      <div class="wrap">
-        <div class="masthead">
-          ${ctx.site.tagline ? html`<p class="masthead-label">${ctx.site.tagline}</p>` : ''}
-          <a class="masthead-title" href="${home}">${ctx.site.title}</a>
-          <p class="masthead-description">${ctx.site.description}</p>
+    <div class="scholar-shell">
+      ${rail(ctx)}
+      <div class="scholar-scrim" data-rail-close aria-hidden="true"></div>
+      <div class="scholar-stage">
+        ${topbar(ctx, options.crumb)}
+        <div class="scholar-grid">
+          <main id="main" class="scholar-main" tabindex="-1">
+            ${content}
+          </main>
+          ${hasPanel ? html`<aside class="scholar-panel" aria-label="${t('a11y.panel')}">${options.panel}</aside>` : ''}
         </div>
-        <div class="masthead-rule" aria-hidden="true"></div>
-        <div class="scholar-bar">
-          <nav class="scholar-nav" aria-label="${t('nav.label')}">
-            ${ctx.nav.map(
-              (item) =>
-                html`<a href="${item.url}" aria-current="${item.current ? 'page' : 'false'}">${item.label}</a>`,
-            )}
-            ${
-              hasSearch && !ctx.nav.some((item) => item.key === 'search')
-                ? html`<a href="${searchUrl(ctx)}" aria-current="${ctx.page.kind === 'search' ? 'page' : 'false'}">${t('nav.search')}</a>`
-                : ''
-            }
-          </nav>
-          <div class="scholar-tools">
-            ${
-              languageLinks.length > 0
-                ? html`<nav class="scholar-language" aria-label="${t('language.switch')}">
-                  ${languageLinks.map(
-                    (alternate) =>
-                      html`<a href="${ctx.helpers.url(alternate.url)}" data-language="${alternate.lang}" lang="${alternate.lang}" hreflang="${alternate.lang}">${alternate.label}</a>`,
-                  )}
-                </nav>`
-                : ''
-            }
-            <button class="scholar-toggle" type="button" data-theme-toggle aria-label="${t('theme.toggle')}">
-              ${t('theme.toggle')}
-            </button>
-          </div>
-        </div>
+        ${footer(ctx)}
       </div>
-    </header>
-    <main id="main" class="scholar-main">
-      <div class="wrap">
-        ${content}
-      </div>
-    </main>
-    <footer class="scholar-footer">
-      <div class="wrap">
-        <p>${
-          ctx.site.author.url
-            ? html`<a href="${ctx.site.author.url}" rel="noopener">${ctx.site.author.name}</a>`
-            : ctx.site.author.name
-        }</p>
-        <p>
-          ${t('footer.license')}: ${ctx.site.license.code} / ${ctx.site.license.content}
-          ${ctx.site.social.map(
-            (social) =>
-              html`<a href="${social.url.startsWith('/') ? ctx.helpers.url(social.url) : social.url}" rel="noopener">${social.label}</a>`,
-          )}
-          ${
-            repositoryUrl
-              ? html`<a href="${repositoryUrl}" rel="noopener">${t('footer.source')}</a>`
-              : ''
-          }
-          <a href="${atomUrl(ctx)}">${t('footer.rss')}</a>
-        </p>
-      </div>
-    </footer>
+    </div>
     ${ctx.assets.themeJs ? html`<script type="module" src="${ctx.assets.themeJs}"></script>` : ''}
   </body>
 </html>`

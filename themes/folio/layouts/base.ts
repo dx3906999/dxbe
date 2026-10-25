@@ -7,6 +7,13 @@ import {
 } from '../../../src/theme/api.ts'
 import { getFolioConfig } from '../config.ts'
 
+export interface BaseOptions {
+  /** Right-hand column: table of contents, recent posts, tags. */
+  panel?: SafeHtml
+  /** Breadcrumb after the home link; defaults to the page title. */
+  crumb?: SafeHtml
+}
+
 function homeUrl(ctx: ThemeContext): string {
   const lang = ctx.i18n.lang
   return ctx.helpers.url(lang === ctx.site.defaultLang ? '/' : `/${lang}/`)
@@ -34,16 +41,114 @@ function themeInitScript(): SafeHtml {
 </script>`)
 }
 
-export function baseLayout(ctx: ThemeContext, content: SafeHtml): SafeHtml {
-  const config = getFolioConfig(ctx)
+function rail(ctx: ThemeContext): SafeHtml {
   const t = ctx.i18n.t
-  const home = homeUrl(ctx)
   const languageLinks = ctx.i18n.alternates.filter((alternate) => alternate.lang !== ctx.i18n.lang)
-  const hasSearch = Boolean(ctx.assets.searchJs)
+  return html`<aside class="rail" id="rail" aria-label="${t('nav.label')}">
+    <div class="rail-inner">
+      <div class="brand">
+        <a class="site-title" href="${homeUrl(ctx)}">${ctx.site.title}</a>
+        <p class="site-tagline">${ctx.site.tagline}</p>
+      </div>
+      <nav class="site-nav" aria-label="${t('nav.label')}">
+        ${ctx.nav.map(
+          (item) =>
+            html`<a href="${item.url}"${item.external ? raw(' rel="noopener"') : ''} aria-current="${item.current ? 'page' : 'false'}">${item.label}</a>`,
+        )}
+      </nav>
+      <div class="rail-foot">
+        <div class="header-tools">
+          ${
+            languageLinks.length > 0
+              ? html`<nav class="language-switch" aria-label="${t('language.switch')}">
+                ${languageLinks.map(
+                  (alternate) =>
+                    html`<a href="${ctx.helpers.url(alternate.url)}" data-language="${alternate.lang}" lang="${alternate.lang}" hreflang="${alternate.lang}">${alternate.label}</a>`,
+                )}
+              </nav>`
+              : ''
+          }
+          <button class="theme-toggle" type="button" data-theme-toggle aria-label="${t('theme.toggle')}">
+            ${t('theme.toggle')}
+          </button>
+        </div>
+        <p class="rail-links">
+          ${ctx.site.social.map(
+            (social) =>
+              html`<a href="${social.url.startsWith('/') ? ctx.helpers.url(social.url) : social.url}" rel="noopener">${social.label}</a>`,
+          )}
+          <a href="${atomUrl(ctx)}">${t('footer.rss')}</a>
+        </p>
+      </div>
+    </div>
+  </aside>`
+}
+
+function topbar(ctx: ThemeContext, crumb: SafeHtml | undefined): SafeHtml {
+  const t = ctx.i18n.t
+  const atHome =
+    ctx.page.kind === 'home' ||
+    (ctx.page.kind === 'index' && ctx.routes.posts === ctx.routes.home && !ctx.pagination?.prevUrl)
+  const current = atHome ? '' : ctx.page.title
+  return html`<header class="topbar">
+    <button class="menu-toggle" type="button" data-rail-toggle aria-controls="rail" aria-expanded="false" aria-label="${t('a11y.menu')}">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="crumb" aria-label="${t('a11y.breadcrumb')}">
+      <a href="${homeUrl(ctx)}">${t('nav.home')}</a>
+      ${
+        crumb
+          ? html`<span class="crumb-sep" aria-hidden="true">/</span>${crumb}`
+          : current
+            ? html`<span class="crumb-sep" aria-hidden="true">/</span><span aria-current="page">${current}</span>`
+            : ''
+      }
+    </nav>
+    ${
+      ctx.assets.searchJs && ctx.page.kind !== 'search'
+        ? html`<form class="topbar-search" action="${searchUrl(ctx)}" method="get" role="search">
+          <label class="visually-hidden" for="topbar-q">${t('nav.search')}</label>
+          <input id="topbar-q" name="q" type="search" placeholder="${t('search.placeholder')}" autocomplete="off">
+        </form>`
+        : ''
+    }
+    <div class="progress" aria-hidden="true"><span data-progress></span></div>
+  </header>`
+}
+
+function footer(ctx: ThemeContext): SafeHtml {
+  const t = ctx.i18n.t
   const repository = ctx.site.repository
   const repositoryUrl = repository
     ? `https://github.com/${repository.owner}/${repository.name}`
     : undefined
+  return html`<footer class="site-footer">
+    <div class="footer-inner">
+      <p>${
+        ctx.site.author.url
+          ? html`<a href="${ctx.site.author.url}" rel="noopener">${ctx.site.author.name}</a>`
+          : ctx.site.author.name
+      }</p>
+      <p>
+        <span>${t('footer.license')}: ${ctx.site.license.code} / ${ctx.site.license.content}</span>
+        ${
+          repositoryUrl
+            ? html`<a href="${repositoryUrl}" rel="noopener">${t('footer.source')}</a>`
+            : ''
+        }
+      </p>
+    </div>
+  </footer>`
+}
+
+export function baseLayout(
+  ctx: ThemeContext,
+  content: SafeHtml,
+  options: BaseOptions = {},
+): SafeHtml {
+  const config = getFolioConfig(ctx)
+  const t = ctx.i18n.t
+  const hasPanel = Boolean(options.panel?.value)
 
   return html`<!doctype html>
 <html lang="${ctx.i18n.lang}" data-theme="auto" style="--accent: ${config.accent}">
@@ -94,69 +199,22 @@ export function baseLayout(ctx: ThemeContext, content: SafeHtml): SafeHtml {
     ${themeInitScript()}
     ${languageBootstrap(ctx)}
   </head>
-  <body class="page-${ctx.page.kind} width-${config.width}">
+  <body class="page-${ctx.page.kind} width-${config.width}${hasPanel ? ' has-panel' : ''}">
     <a class="skip-link" href="#main">${t('a11y.skip')}</a>
-    <header class="site-header">
-      <div class="wrap header-inner">
-        <div class="brand">
-          <a class="site-title" href="${home}">${ctx.site.title}</a>
-          <p class="site-tagline">${ctx.site.tagline}</p>
+    <div class="shell">
+      ${rail(ctx)}
+      <div class="scrim" data-rail-close aria-hidden="true"></div>
+      <div class="stage">
+        ${topbar(ctx, options.crumb)}
+        <div class="stage-grid">
+          <main id="main" class="site-main" tabindex="-1">
+            ${content}
+          </main>
+          ${hasPanel ? html`<aside class="panel" aria-label="${t('a11y.panel')}">${options.panel}</aside>` : ''}
         </div>
-        <nav class="site-nav" aria-label="${t('nav.label')}">
-          ${ctx.nav.map(
-            (item) =>
-              html`<a href="${item.url}"${item.external ? raw(' rel="noopener"') : ''} aria-current="${item.current ? 'page' : 'false'}">${item.label}</a>`,
-          )}
-          ${
-            hasSearch && !ctx.nav.some((item) => item.key === 'search')
-              ? html`<a href="${searchUrl(ctx)}" aria-current="${ctx.page.kind === 'search' ? 'page' : 'false'}">${t('nav.search')}</a>`
-              : ''
-          }
-        </nav>
-        <div class="header-tools">
-          ${
-            languageLinks.length > 0
-              ? html`<nav class="language-switch" aria-label="${t('language.switch')}">
-                ${languageLinks.map(
-                  (alternate) =>
-                    html`<a href="${ctx.helpers.url(alternate.url)}" data-language="${alternate.lang}" lang="${alternate.lang}" hreflang="${alternate.lang}">${alternate.label}</a>`,
-                )}
-              </nav>`
-              : ''
-          }
-          <button class="theme-toggle" type="button" data-theme-toggle aria-label="${t('theme.toggle')}">
-            ${t('theme.toggle')}
-          </button>
-        </div>
+        ${footer(ctx)}
       </div>
-    </header>
-    <main id="main" class="site-main">
-      <div class="wrap">
-        ${content}
-      </div>
-    </main>
-    <footer class="site-footer">
-      <div class="wrap footer-inner">
-        <p>${
-          ctx.site.author.url
-            ? html`<a href="${ctx.site.author.url}" rel="noopener">${ctx.site.author.name}</a>`
-            : ctx.site.author.name
-        }</p>
-        <p>
-          <span>${t('footer.license')}: ${ctx.site.license.code} / ${ctx.site.license.content}</span>
-          ${ctx.site.social.map(
-            (social) =>
-              html`<a href="${social.url.startsWith('/') ? ctx.helpers.url(social.url) : social.url}" rel="noopener">${social.label}</a>`,
-          )}
-          ${
-            repositoryUrl
-              ? html`<a href="${repositoryUrl}" rel="noopener">${t('footer.source')}</a>`
-              : ''
-          }
-          <a href="${atomUrl(ctx)}">${t('footer.rss')}</a>
-        </p>
-      </div>
-    </footer>
+    </div>
     ${ctx.assets.themeJs ? html`<script type="module" src="${ctx.assets.themeJs}"></script>` : ''}
   </body>
 </html>`

@@ -1,6 +1,6 @@
 import { html, type LayoutFn } from '../../../src/theme/api.ts'
 import { baseLayout } from './base.ts'
-import { postList } from './components.ts'
+import { listPanel, postList } from './components.ts'
 
 /** Profile home: the introduction page, then the three latest posts. */
 export const home: LayoutFn = (ctx) => {
@@ -27,5 +27,6 @@ export const home: LayoutFn = (ctx) => {
         </section>`
         : ''
     }`,
+    { panel: listPanel(ctx, ctx.posts ?? []) },
   )
 }

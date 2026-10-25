@@ -58,6 +58,9 @@ search:
   noscript: 搜索需要 JavaScript。
 a11y:
   skip: 跳到正文
+  menu: 打开导航
+  breadcrumb: 面包屑
+  panel: 侧栏
 tag:
   empty: 还没有标签。
 home:
