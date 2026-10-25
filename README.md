@@ -25,20 +25,20 @@ dxbe 是一个面向个人博客的静态站点生成器。用 Markdown 写内�
 
 ## 快速开始
 
-需要 Node.js 24 或更高版本。下面的命令安装 v0.7.0 发布版；加密文章和 `dxbe deploy` 从 0.7.0 开始提供，apogee / capstan 主题、个人主页、分类、发表页和 PDF 嵌入从 0.6.0 开始。
+需要 Node.js 24 或更高版本。下面的命令安装 v0.8.0 发布版；文章封面和 `dxbe help` 从 0.8.0 开始提供，加密文章和 `dxbe deploy` 从 0.7.0 开始，apogee / capstan 主题、个人主页、分类、发表页和 PDF 嵌入从 0.6.0 开始。
 
 ```bash
 mkdir my-blog
 cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.7.0/dxbe-0.7.0.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.8.0/dxbe-0.8.0.tgz
 npx dxbe setup
 npx dxbe dev
 ```
 
 第一次用？[docs/tutorial.md](docs/tutorial.md) 从建仓库、部署到写文章、发布一步步走完。命令行里 `npx dxbe help` 列出所有命令，`npx dxbe <命令> --help` 显示参数和例子。
 
-发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.7.0`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
+发布版 tarball 安装不依赖 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.8.0`，npm 会把依赖记录成 `git+ssh`；CI 需要 SSH key，或把 GitHub 的 SSH URL 重写为 HTTPS。
 
 `setup` 会询问作者、站点标题、英文站点信息、域名和主题，并生成 `site.config.ts`。它同时把仓库补成能直接构建和部署的样子：`package.json` 设为 `"type": "module"`（`npm init -y` 默认是 `commonjs`，配置文件会加载失败）并补上 `dev`、`build`、`check` 等脚本，生成 `.nvmrc`（部署工作流从这里读 Node 版本）和 `.gitignore`。已有的脚本和文件不会被覆盖。非交互使用：
 
