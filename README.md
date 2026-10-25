@@ -255,7 +255,7 @@ npm pack --dry-run
 
 - `.github/workflows/ci.yml`：PR 和 `main` 推送；Ubuntu + Windows；跑 `npm run check`、确定性检查、actionlint，并验证 npm 包内容
 - `templates/deploy.yml`：博客实例的 Pages 部署模板，复制到博客仓库后使用
-- `.github/workflows/release.yml`：推送 `v*` tag 时先确认 tag 与 `package.json` 版本一致，再构建 tarball 并创建 GitHub Release；发版前先改 `package.json` 版本号
+- `.github/workflows/release.yml`：推送 `v*` tag 时先确认 tag 与 `package.json` 版本一致，再构建 tarball 并创建 GitHub Release；完整的发布和升级步骤见 [docs/releasing.md](docs/releasing.md)
 - `.github/workflows/external-links.yml`：每周检查内容里的外部链接
 - `.github/dependabot.yml`：每周更新 npm 和 GitHub Actions
 
@@ -271,7 +271,7 @@ src/cli/             bin 子命令、检查、Pagefind、开发服务器
 src/assets/          search.js（随包发布）
 scripts/             包构建时复制主题资源和 search.js
 tests/               单元和集成测试
-docs/                架构、写作、主题、部署、设计检查
+docs/                架构、写作、主题、部署、发布、设计检查
 content/             演示站点（不随包发布）
 site.config.ts       演示配置（不随包发布）
 templates/deploy.yml 博客仓库部署模板

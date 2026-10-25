@@ -119,3 +119,7 @@ DNS 还没生效，或域名被其他 Pages 站点占用。先确认 CNAME/A 记
 **Pages Source 还是 "Deploy from a branch"**
 
 改成 **GitHub Actions**。`deploy-pages` 需要这个设置，且工作流需要 `pages: write` 和 `id-token: write`。
+
+## 升级 dxbe
+
+换新版本、检查和常见问题见 [releasing.md](releasing.md#博客仓库升级-dxbe)。
