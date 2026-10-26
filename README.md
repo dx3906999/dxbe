@@ -61,7 +61,7 @@ dxbe 是我给自己的博客写的工具，按自己的写作和发布习惯设
 ```bash
 mkdir my-blog && cd my-blog
 npm init -y
-npm install https://github.com/dx3906999/dxbe/releases/download/v0.9.0/dxbe-0.9.0.tgz
+npm install https://github.com/dx3906999/dxbe/releases/download/v0.9.1/dxbe-0.9.1.tgz
 npx dxbe setup
 npx dxbe dev
 ```
@@ -74,7 +74,7 @@ npx dxbe setup --yes --force --name "Your Name" --url "https://example.com" --th
 
 第一次用的话，[docs/tutorial.md](docs/tutorial.md) 从建仓库、写第一篇文章到部署上线完整走一遍。
 
-> 从 Release 的 tarball 安装不需要 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.9.0`，npm 会把依赖记成 `git+ssh`，CI 里需要 SSH key 或把 SSH URL 改写成 HTTPS。
+> 从 Release 的 tarball 安装不需要 git 或 SSH。如果改用 `npm install github:dx3906999/dxbe#v0.9.1`，npm 会把依赖记成 `git+ssh`，CI 里需要 SSH key 或把 SSH URL 改写成 HTTPS。
 
 博客仓库最后只需要这些：
 
