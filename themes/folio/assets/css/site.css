@@ -645,7 +645,7 @@ body:not(.page-post):not(.page-page) .progress {
   display: block;
   width: 100%;
   max-height: 28rem;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 3px;
 }
 
@@ -826,6 +826,30 @@ html[data-theme="dark"] .shiki {
    margin-right: -2px); under overflow-x: auto that is a scrollbar per equation */
 .katex-display .tag .vlist-t2 {
   margin-right: 0;
+}
+
+/* a numbered equation's tag is absolutely positioned at the right edge, so an
+   equation wider than the column scrolls underneath it. Put the tag in flow: the
+   ::before mirrors it to keep the equation centred, and both scroll together.
+   The :has() lifts these over katex.min.css, which loads after this sheet */
+.katex-display > .katex > .katex-html:has(> .tag) {
+  display: flex;
+  align-items: baseline;
+  width: max-content;
+  min-width: 100%;
+}
+
+.katex-display > .katex > .katex-html:has(> .tag)::before {
+  content: "";
+  flex: 1 1 0;
+  padding-left: 1em;
+}
+
+.katex-display > .katex > .katex-html:has(> .tag) > .tag {
+  position: static;
+  flex: 1 1 0;
+  padding-left: 1em;
+  text-align: right;
 }
 
 .toc {
